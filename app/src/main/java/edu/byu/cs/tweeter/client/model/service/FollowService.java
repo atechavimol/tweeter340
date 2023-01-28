@@ -48,10 +48,7 @@ public class FollowService {
             if (success) {
                 List<User> followees = (List<User>) msg.getData().getSerializable(GetFollowingTask.FOLLOWEES_KEY);
                 boolean hasMorePages = msg.getData().getBoolean(GetFollowingTask.MORE_PAGES_KEY);
-
                 observer.addFollowees(followees, hasMorePages );
-
-
             } else if (msg.getData().containsKey(GetFollowingTask.MESSAGE_KEY)) {
                 String message = msg.getData().getString(GetFollowingTask.MESSAGE_KEY);
                 observer.displayError("Failed to get following: " + message);

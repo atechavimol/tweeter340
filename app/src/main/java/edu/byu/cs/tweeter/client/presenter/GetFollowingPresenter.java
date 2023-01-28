@@ -3,18 +3,11 @@ package edu.byu.cs.tweeter.client.presenter;
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowingPresenter {
     private static final int PAGE_SIZE = 10;
-
-    public boolean hasMorePages() {
-        return hasMorePages;
-    }
-
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
-    }
 
     public interface View {
         void setLoadingFooter(boolean status);
@@ -22,11 +15,14 @@ public class GetFollowingPresenter {
         void displayMessage(String message);
 
         void addMoreItems(List<User> followees);
+
+        void startActivity(User user);
     }
 
     private View view;
 
     private FollowService followService;
+    private UserService userService;
 
     private User lastFollowee;
     private boolean hasMorePages;
@@ -38,12 +34,21 @@ public class GetFollowingPresenter {
     public void setLoading(boolean loading) {
         isLoading = loading;
     }
+    public boolean hasMorePages() {
+        return hasMorePages;
+    }
+
+    public void setHasMorePages(boolean hasMorePages) {
+        this.hasMorePages = hasMorePages;
+    }
+
 
     private boolean isLoading = false;
 
     public GetFollowingPresenter(View view) {
         this.view = view;
         followService = new FollowService();
+        userService = new UserService();
     }
 
     public void loadMoreItems(User user) {
@@ -52,6 +57,10 @@ public class GetFollowingPresenter {
             view.setLoadingFooter(true);
             followService.loadMoreItems(user, PAGE_SIZE, lastFollowee, new GetFollowingObserver());
         }
+    }
+
+    public void getUserProfile(String alias) {
+        userService.getUserProfile(alias, new GetUserObserver());
     }
 
     public class GetFollowingObserver implements FollowService.Observer {
@@ -68,7 +77,7 @@ public class GetFollowingPresenter {
             isLoading = false;
             view.setLoadingFooter(false);
 
-            view.displayMessage("Failed to get following because of exception: " + ex.getMessage());
+            view.displayMessage(ex.getMessage());
         }
 
         @Override
@@ -79,6 +88,19 @@ public class GetFollowingPresenter {
             lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.addMoreItems(followees);
+        }
+    }
+
+    public class GetUserObserver implements UserService.Observer {
+
+        @Override
+        public void startActivity(User user) {
+            view.startActivity(user);
+        }
+
+        @Override
+        public void displayMessage(String s) {
+            view.displayMessage(s);
         }
     }
 }
