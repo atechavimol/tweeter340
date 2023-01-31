@@ -83,8 +83,6 @@ public class FollowService {
 
         @Override
         public void handleMessage(@NonNull Message msg) {
-//            isLoading = false;
-//            removeLoadingFooter();
 
             boolean success = msg.getData().getBoolean(GetFollowersTask.SUCCESS_KEY);
             if (success) {
