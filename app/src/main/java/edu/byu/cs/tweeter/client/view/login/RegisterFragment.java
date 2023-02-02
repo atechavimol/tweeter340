@@ -83,7 +83,6 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Register and move to MainActivity.
                 presenter.registerUser(firstName.getText().toString(), lastName.getText().toString(),
                                         alias.getText().toString(), password.getText().toString(), imageToUpload) ;
             }
@@ -111,7 +110,6 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
 
         registeringToast.cancel();
-
         Toast.makeText(getContext(), "Hello " + Cache.getInstance().getCurrUser().getName(), Toast.LENGTH_LONG).show();
 
         try {
@@ -139,15 +137,12 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
 
     @Override
     public String getImageByteString() {
-        // Convert image to byte array.
         Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
         byte[] imageBytes = bos.toByteArray();
 
-        // Intentionally, Use the java Base64 encoder so it is compatible with M4.
         String imageBytesBase64 = Base64.getEncoder().encodeToString(imageBytes);
-
         return imageBytesBase64;
     }
 }

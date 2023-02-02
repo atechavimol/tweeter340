@@ -89,7 +89,7 @@ public class StatusDialogFragment extends AppCompatDialogFragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Context context) { //ethan was here, hello amy's professor
         super.onAttach(context);
         try {
             observer = (Observer) context;

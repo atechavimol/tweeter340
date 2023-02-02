@@ -97,7 +97,7 @@ public class FollowingFragment extends Fragment implements GetFollowingPresenter
 
     @Override
     public void displayMessage(String message) {
-        Toast.makeText(getContext(), "Message: " + message, Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
 
     }
 

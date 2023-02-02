@@ -49,7 +49,6 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
     private static final int LOADING_DATA_VIEW = 0;
     private static final int ITEM_VIEW = 1;
 
-
     private User user;
 
     private FeedRecyclerViewAdapter feedRecyclerViewAdapter;
@@ -88,7 +87,6 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
 
         feedRecyclerViewAdapter = new FeedRecyclerViewAdapter();
         feedRecyclerView.setAdapter(feedRecyclerViewAdapter);
-
         feedRecyclerView.addOnScrollListener(new FeedRecyclerViewPaginationScrollListener(layoutManager));
 
         presenter = new FeedPresenter(this);
@@ -105,7 +103,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
 
     @Override
     public void displayMessage(String message) {
-        Toast.makeText(getContext(), "Message: " + message, Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override
