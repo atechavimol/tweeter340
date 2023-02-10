@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
+package edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.StatusService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask;
 import edu.byu.cs.tweeter.model.domain.Status;

@@ -8,9 +8,9 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFeedHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetStoryHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PostStatusHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.GetFeedHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.GetStoryHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.PostStatusHandler;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
