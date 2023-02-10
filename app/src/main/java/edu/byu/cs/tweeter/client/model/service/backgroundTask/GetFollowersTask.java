@@ -2,8 +2,6 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,7 +14,7 @@ import edu.byu.cs.tweeter.util.Pair;
 /**
  * Background task that retrieves a page of followers.
  */
-public class GetFollowersTask implements Runnable {
+public class GetFollowersTask extends BackgroundTask {
     private static final String LOG_TAG = "GetFollowersTask";
 
     public static final String SUCCESS_KEY = "success";
@@ -43,38 +41,35 @@ public class GetFollowersTask implements Runnable {
      * This allows the new page to begin where the previous page ended.
      */
     private User lastFollower;
-    /**
-     * Message handler that will receive task results.
-     */
-    private Handler messageHandler;
+
+    private List<User> followers;
+    private boolean hasMorePages;
 
     public GetFollowersTask(AuthToken authToken, User targetUser, int limit, User lastFollower,
                             Handler messageHandler) {
+        super(messageHandler);
         this.authToken = authToken;
         this.targetUser = targetUser;
         this.limit = limit;
         this.lastFollower = lastFollower;
-        this.messageHandler = messageHandler;
     }
 
     @Override
-    public void run() {
-        try {
-            Pair<List<User>, Boolean> pageOfUsers = getFollowers();
+    protected void processTask() {
+        Pair<List<User>, Boolean> pageOfUsers = getFollowers();
 
-            List<User> followers = pageOfUsers.getFirst();
-            boolean hasMorePages = pageOfUsers.getSecond();
+        followers = pageOfUsers.getFirst();
+        hasMorePages = pageOfUsers.getSecond();
+    }
 
-            sendSuccessMessage(followers, hasMorePages);
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
+    @Override
+    protected void loadSuccessBundle(Bundle msgBundle) {
+        msgBundle.putSerializable(FOLLOWERS_KEY, (Serializable) followers);
+        msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
     }
 
     private FakeData getFakeData() {
-        return FakeData.getInstance();
+        return super.getFakeData();
     }
 
     private Pair<List<User>, Boolean> getFollowers() {
@@ -82,38 +77,6 @@ public class GetFollowersTask implements Runnable {
         return pageOfUsers;
     }
 
-    private void sendSuccessMessage(List<User> followers, boolean hasMorePages) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, true);
-        msgBundle.putSerializable(FOLLOWERS_KEY, (Serializable) followers);
-        msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
 
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendFailedMessage(String message) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putString(MESSAGE_KEY, message);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendExceptionMessage(Exception exception) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putSerializable(EXCEPTION_KEY, exception);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
 
 }

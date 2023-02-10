@@ -2,8 +2,6 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -11,7 +9,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Background task that queries how many other users a specified user is following.
  */
-public class GetFollowingCountTask implements Runnable {
+public class GetFollowingCountTask extends BackgroundTask {
     private static final String LOG_TAG = "GetFollowingCountTask";
 
     public static final String SUCCESS_KEY = "success";
@@ -31,56 +29,23 @@ public class GetFollowingCountTask implements Runnable {
     /**
      * Message handler that will receive task results.
      */
-    private Handler messageHandler;
 
     public GetFollowingCountTask(AuthToken authToken, User targetUser, Handler messageHandler) {
+        super(messageHandler);
         this.authToken = authToken;
         this.targetUser = targetUser;
-        this.messageHandler = messageHandler;
+    }
+
+
+    @Override
+    protected void processTask() {
     }
 
     @Override
-    public void run() {
-        try {
+    protected void loadSuccessBundle(Bundle msgBundle) {
+        msgBundle.putInt(COUNT_KEY, 20);
 
-            sendSuccessMessage(20);
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
     }
 
-    private void sendSuccessMessage(int count) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, true);
-        msgBundle.putInt(COUNT_KEY, count);
 
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendFailedMessage(String message) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putString(MESSAGE_KEY, message);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendExceptionMessage(Exception exception) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putSerializable(EXCEPTION_KEY, exception);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
 }

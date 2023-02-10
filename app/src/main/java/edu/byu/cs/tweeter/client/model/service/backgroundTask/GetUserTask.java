@@ -2,8 +2,6 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -12,7 +10,7 @@ import edu.byu.cs.tweeter.util.FakeData;
 /**
  * Background task that returns the profile for a specified user.
  */
-public class GetUserTask implements Runnable {
+public class GetUserTask extends BackgroundTask {
     private static final String LOG_TAG = "GetUserTask";
 
     public static final String SUCCESS_KEY = "success";
@@ -31,66 +29,31 @@ public class GetUserTask implements Runnable {
     /**
      * Message handler that will receive task results.
      */
-    private Handler messageHandler;
+
+    private User user;
 
     public GetUserTask(AuthToken authToken, String alias, Handler messageHandler) {
+        super(messageHandler);
         this.authToken = authToken;
         this.alias = alias;
-        this.messageHandler = messageHandler;
+    }
+
+
+    @Override
+    protected void processTask() {
+        user = getUser();
     }
 
     @Override
-    public void run() {
-        try {
-            User user = getUser();
-
-            sendSuccessMessage(user);
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.getMessage(), ex);
-            sendExceptionMessage(ex);
-        }
+    protected void loadSuccessBundle(Bundle msgBundle) {
+        msgBundle.putSerializable(USER_KEY, user);
     }
 
-    private FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
 
     private User getUser() {
         User user = getFakeData().findUserByAlias(alias);
         return user;
     }
 
-    private void sendSuccessMessage(User user) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, true);
-        msgBundle.putSerializable(USER_KEY, user);
 
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendFailedMessage(String message) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putString(MESSAGE_KEY, message);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
-
-    private void sendExceptionMessage(Exception exception) {
-        Bundle msgBundle = new Bundle();
-        msgBundle.putBoolean(SUCCESS_KEY, false);
-        msgBundle.putSerializable(EXCEPTION_KEY, exception);
-
-        Message msg = Message.obtain();
-        msg.setData(msgBundle);
-
-        messageHandler.sendMessage(msg);
-    }
 }
