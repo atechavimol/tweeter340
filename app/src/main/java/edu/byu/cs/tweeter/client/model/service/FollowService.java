@@ -12,13 +12,16 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountT
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.FollowHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.GetFollowersCountHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.GetFollowersHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.GetFollowingCountHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.GetFollowingHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.IsFollowerHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask2.handler.UnfollowHandler;
+//import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.FollowHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowersCountHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowersHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingCountHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.UnfollowHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -42,13 +45,13 @@ public class FollowService {
 
     }
 
-    public interface FollowUnfollowObserver {
+    public interface FollowUnfollowObserver extends SimpleNotificationObserver {
 
-        void update(boolean b);
-
-        void displayMessage(String s);
-
-        void enableFollowButton(boolean b);
+//        void update(boolean b);
+//
+//        void displayMessage(String s);
+//
+//        void enableFollowButton(boolean b);
     }
 
     public interface CountObserver {
@@ -83,14 +86,14 @@ public class FollowService {
 
     public void followUser(User user, MainPresenter.FollowUnfollowObserver observer) {
         FollowTask followTask = new FollowTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, new FollowHandler(observer));
+                user, new SimpleNotificationHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(followTask);
     }
 
     public void unfollowUser(User user, MainPresenter.FollowUnfollowObserver observer) {
         UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, new UnfollowHandler(observer));
+                user, new SimpleNotificationHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(unfollowTask);
     }

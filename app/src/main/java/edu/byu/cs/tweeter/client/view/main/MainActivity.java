@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             public void onClick(View v) {
                 followButton.setEnabled(false);
                 presenter.followOrUnfollow(selectedUser, followButton.getText().toString().equals(v.getContext().getString(R.string.following)));
+
             }
         });
     }
@@ -151,12 +152,14 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     }
 
 
+    // My code
     public void updateSelectedUserFollowingAndFollowers() {
         presenter.updateFollowingAndFollowers(selectedUser);
     }
 
-    public void updateFollowButton(boolean removed) {
-        if (removed) {
+    public void updateFollowButton() {
+        System.out.println(followButton.getText());
+        if (followButton.getText().equals("Following")) {
             followButton.setText(R.string.follow);
             followButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         } else {
@@ -176,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             followButton.setText(R.string.follow);
             followButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         }
+        followButton.setEnabled(true);
     }
 
     @Override
@@ -185,15 +189,15 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     }
 
     @Override
-    public void updateFollowUnfollow(boolean b) {
+    public void updateFollowUnfollow() {
         updateSelectedUserFollowingAndFollowers();
-        updateFollowButton(b);
+        updateFollowButton();
     }
 
-    @Override
-    public void enableFollowButton(boolean b) {
-        followButton.setEnabled(b);
-    }
+//    @Override
+//    public void enableFollowButton(boolean b) {
+//        followButton.setEnabled(b);
+//    }
 
     @Override
     public void logout() {

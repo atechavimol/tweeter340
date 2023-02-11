@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -26,9 +27,8 @@ public class MainPresenter {
 
         void displayMessage(String s);
 
-        void updateFollowUnfollow(boolean b);
+        void updateFollowUnfollow();
 
-        void enableFollowButton(boolean b);
 
         void logout();
 
@@ -162,12 +162,7 @@ public class MainPresenter {
         }
     }
     
-    public class FollowUnfollowObserver implements FollowService.FollowUnfollowObserver {
-
-        @Override
-        public void update(boolean b) {
-            view.updateFollowUnfollow(b);
-        }
+    public class FollowUnfollowObserver implements SimpleNotificationObserver {
 
         @Override
         public void displayMessage(String s) {
@@ -175,9 +170,17 @@ public class MainPresenter {
         }
 
         @Override
-        public void enableFollowButton(boolean b) {
-            view.enableFollowButton(b);
+        public void handleSuccess() {
+            view.updateFollowUnfollow();
         }
+
+
+//
+//        @Override
+//        public void update(Boolean b) {
+//            view.updateFollowUnfollow(b);
+//
+//        }
     }
 
     public class LogoutObserver implements UserService.LogoutObserver {
