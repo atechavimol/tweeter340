@@ -17,6 +17,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollower
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountTaskObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
@@ -34,7 +35,7 @@ public class FollowService {
 //        void addFollows(List<User> follows, boolean hasMorePages);
     }
 
-    public interface isFollowerObserver {
+    public interface isFollowerObserver extends IsFollowerObserver {
 
         void setFollowButton(boolean isFollower);
 

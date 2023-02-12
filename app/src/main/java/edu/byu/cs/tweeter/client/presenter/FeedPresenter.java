@@ -98,26 +98,7 @@ public class FeedPresenter {
 
             view.displayMessage(message);
         }
-//
-//        @Override
-//        public void addItems(List<Status> statuses, boolean hasMorePages) {
-//            isLoading = false;
-//            view.setLoadingFooter(false);
-//
-//            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
-//            setHasMorePages(hasMorePages);
-//            view.addMoreItems(statuses);
-//
-//
-//        }
-//
-//        @Override
-//        public void displayMessage(String s) {
-//            isLoading = false;
-//            view.setLoadingFooter(false);
-//
-//            view.displayMessage(s);
-//        }
+
     }
 
 

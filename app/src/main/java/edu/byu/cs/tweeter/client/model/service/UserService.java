@@ -11,8 +11,9 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.AuthenticateTaskHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetUserHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LogoutHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticateTaskObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -20,17 +21,17 @@ public class UserService {
 
 
 
-    public interface Observer extends AuthenticateTaskObserver {
-        void startActivity(User user);
-
-        void displayMessage(String s);
+    public interface Observer extends UserTaskObserver {
+//        void startActivity(User user);
+//
+//        void displayMessage(String s);
     }
-    public interface LogoutObserver {
+    public interface LogoutObserver extends SimpleNotificationObserver {
 
-
-        void logout();
-
-        void displayMessage(String s);
+//
+//        void logout();
+//
+//        void displayMessage(String s);
     }
 
     public void getUserProfile(String alias, Observer observer) {
@@ -56,7 +57,7 @@ public class UserService {
     }
 
     public void logoutUser(MainPresenter.LogoutObserver logoutObserver) {
-        LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new LogoutHandler(logoutObserver) );
+        LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new SimpleNotificationHandler(logoutObserver) );
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }

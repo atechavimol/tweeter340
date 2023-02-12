@@ -185,15 +185,20 @@ public class MainPresenter {
     }
 
     public class LogoutObserver implements UserService.LogoutObserver {
-
-        @Override
-        public void logout() {
-            view.logout();
-        }
+//
+//        @Override
+//        public void logout() {
+//            view.logout();
+//        }
 
         @Override
         public void displayMessage(String s) {
             view.displayMessage(s);
+        }
+
+        @Override
+        public void handleSuccess() {
+            view.logout();
         }
     }
     
@@ -231,14 +236,20 @@ public class MainPresenter {
 
     public class PostStatusObserver implements StatusService.PostStatusObserver {
 
-        @Override
-        public void update() {
-            view.cancelPostingToast();
-        }
+//        @Override
+//        public void update() {
+//
+//        }
 
         @Override
         public void displayMessage(String s) {
             view.displayMessage(s);
+        }
+
+        @Override
+        public void handleSuccess() {
+            view.cancelPostingToast();
+            view.displayMessage("Successfully Posted!");
         }
     }
 
