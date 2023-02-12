@@ -65,30 +65,45 @@ public class GetFollowingPresenter {
 
     public class GetFollowingObserver implements FollowService.Observer {
         @Override
-        public void displayError(String message) {
+        public <T> void handleSuccess(List<T> items, Boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
+            lastFollowee = (items.size() > 0) ? (User) items.get(items.size() - 1) : null;
+            setHasMorePages(hasMorePages);
+            view.addMoreItems((List<User>) items);
+        }
 
+        @Override
+        public void displayMessage(String message) {
+            isLoading = false;
+            view.setLoadingFooter(false);
             view.displayMessage(message);
         }
-
-        @Override
-        public void displayException(Exception ex) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-
-            view.displayMessage(ex.getMessage());
-        }
-
-        @Override
-        public void addFollows(List<User> followees, boolean hasMorePages) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-
-            lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
-            setHasMorePages(hasMorePages);
-            view.addMoreItems(followees);
-        }
+//        @Override
+//        public void displayError(String message) {
+//            isLoading = false;
+//            view.setLoadingFooter(false);
+//
+//            view.displayMessage(message);
+//        }
+//
+//        @Override
+//        public void displayException(Exception ex) {
+//            isLoading = false;
+//            view.setLoadingFooter(false);
+//
+//            view.displayMessage(ex.getMessage());
+//        }
+//
+//        @Override
+//        public void addFollows(List<User> followees, boolean hasMorePages) {
+//            isLoading = false;
+//            view.setLoadingFooter(false);
+//
+//            lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
+//            setHasMorePages(hasMorePages);
+//            view.addMoreItems(followees);
+//        }
     }
 
     public class GetUserObserver implements UserService.Observer {

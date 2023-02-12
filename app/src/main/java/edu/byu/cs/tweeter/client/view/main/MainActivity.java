@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             public void onClick(View v) {
                 followButton.setEnabled(false);
                 presenter.followOrUnfollow(selectedUser, followButton.getText().toString().equals(v.getContext().getString(R.string.following)));
-
+                followButton.setEnabled(true);
             }
         });
     }
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     }
 
     public void updateFollowButton() {
-        System.out.println(followButton.getText());
+       // System.out.println(followButton.getText());
         if (followButton.getText().equals("Following")) {
             followButton.setText(R.string.follow);
             followButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
