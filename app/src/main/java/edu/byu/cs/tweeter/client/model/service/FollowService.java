@@ -1,6 +1,5 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,15 +11,13 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountT
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
-//import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.FollowHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowersCountHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingCountHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.UnfollowHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountTaskObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -54,13 +51,13 @@ public class FollowService {
 //        void enableFollowButton(boolean b);
     }
 
-    public interface CountObserver {
+    public interface CountObserver extends CountTaskObserver {
 
-        void displayMessage(String s);
-
-        void setFollowerCount(int count);
-
-        void setFollowingCount(int count);
+//        void displayMessage(String s);
+//
+//        void setFollowerCount(int count);
+//
+//        void setFollowingCount(int count);
     }
 
     public void loadMoreItems(User user, int pageSize, User lastFollowee, Observer observer) {
@@ -97,7 +94,7 @@ public class FollowService {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(unfollowTask);
     }
-    public void updateFollowingAndFollowers(User selectedUser, MainPresenter.CountObserver countObserver) {
+    public void updateFollowingAndFollowers(User selectedUser, CountTaskObserver countObserver) {
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         // Get count of most recently selected user's followers.

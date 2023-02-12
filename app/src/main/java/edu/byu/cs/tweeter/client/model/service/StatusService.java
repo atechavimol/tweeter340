@@ -19,10 +19,6 @@ public class StatusService {
 
 
     public interface Observer extends PagedNotificationObserver {
-//
-//        void addItems(List<Status> statuses, boolean hasMorePages);
-//
-//        void displayMessage(String s);
     }
 
     public interface PostStatusObserver {

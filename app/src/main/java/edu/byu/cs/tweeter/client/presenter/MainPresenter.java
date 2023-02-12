@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountTaskObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -196,20 +197,35 @@ public class MainPresenter {
         }
     }
     
-    public class CountObserver implements FollowService.CountObserver {
+    public class CountObserver implements CountTaskObserver {
         @Override
         public void displayMessage(String s) {
             view.displayMessage(s);
         }
 
+//        @Override
+//        public void setFollowerCount(int count) {
+//            view.setFollowerCount(count);
+//        }
+//
+//        @Override
+//        public void setFollowingCount(int count) {
+//            view.setFollowingCount(count);
+//        }
+//
+//        @Override
+//        public void handleSuccess(int count) {
+//
+//        }
+
         @Override
-        public void setFollowerCount(int count) {
-            view.setFollowerCount(count);
+        public void setFollowing(int count) {
+            view.setFollowingCount(count);
         }
 
         @Override
-        public void setFollowingCount(int count) {
-            view.setFollowingCount(count);
+        public void setFollowers(int count) {
+            view.setFollowerCount(count);
         }
     }
 
