@@ -8,8 +8,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFeedHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetStoryHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PostStatusHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -34,14 +33,14 @@ public class StatusService {
     }
     public void getFeed(User user, int pageSize, Status lastStatus, Observer observer) {
         GetFeedTask getFeedTask = new GetFeedTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, pageSize, lastStatus, new GetFeedHandler(observer));
+                user, pageSize, lastStatus, new PagedNotificationHandler<Status>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFeedTask);
     }
 
     public void getStory(User user, int pageSize, Status lastStatus, Observer observer) {
         GetStoryTask getStoryTask = new GetStoryTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, pageSize, lastStatus, new GetStoryHandler(observer) );
+                user, pageSize, lastStatus, new PagedNotificationHandler<Status>(observer) );
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getStoryTask);
     }

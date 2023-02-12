@@ -7,10 +7,8 @@ import android.os.Bundle;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
-import edu.byu.cs.tweeter.model.domain.User;
 
 public class PagedNotificationHandler<T> extends BackgroundTaskHandler<PagedNotificationObserver> {
 
