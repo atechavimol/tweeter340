@@ -81,26 +81,43 @@ public class FeedPresenter {
     }
 
     public class GetFeedObserver implements StatusService.Observer {
-
         @Override
-        public void addItems(List<Status> statuses, boolean hasMorePages) {
+        public <T> void handleSuccess(List<T> items, Boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
 
-            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
+            lastStatus = (items.size() > 0) ? (Status) items.get(items.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.addMoreItems(statuses);
-
-
+            view.addMoreItems((List<Status>) items);
         }
 
         @Override
-        public void displayMessage(String s) {
+        public void displayMessage(String message) {
             isLoading = false;
             view.setLoadingFooter(false);
 
-            view.displayMessage(s);
+            view.displayMessage(message);
         }
+//
+//        @Override
+//        public void addItems(List<Status> statuses, boolean hasMorePages) {
+//            isLoading = false;
+//            view.setLoadingFooter(false);
+//
+//            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
+//            setHasMorePages(hasMorePages);
+//            view.addMoreItems(statuses);
+//
+//
+//        }
+//
+//        @Override
+//        public void displayMessage(String s) {
+//            isLoading = false;
+//            view.setLoadingFooter(false);
+//
+//            view.displayMessage(s);
+//        }
     }
 
 
