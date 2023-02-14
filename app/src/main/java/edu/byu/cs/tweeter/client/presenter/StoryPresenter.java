@@ -4,6 +4,8 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -61,7 +63,7 @@ public class StoryPresenter {
         }
     }
     
-    public class GetUserObserver implements UserService.Observer {
+    public class GetUserObserver implements UserTaskObserver {
         @Override
         public void startActivity(User user) {
             view.startActivity(user);
@@ -73,7 +75,7 @@ public class StoryPresenter {
         }
     }
 
-    public class GetStoryObserver implements StatusService.Observer {
+    public class GetStoryObserver implements PagedNotificationObserver {
         @Override
         public void displayMessage(String s) {
             isLoading = false;

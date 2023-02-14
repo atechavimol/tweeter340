@@ -14,27 +14,14 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetUserHan
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
+import edu.byu.cs.tweeter.client.presenter.LoginPresenter;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
-import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
 
 public class UserService {
 
 
-
-    public interface Observer extends UserTaskObserver {
-//        void startActivity(User user);
-//
-//        void displayMessage(String s);
-    }
-    public interface LogoutObserver extends SimpleNotificationObserver {
-
-//
-//        void logout();
-//
-//        void displayMessage(String s);
-    }
-
-    public void getUserProfile(String alias, Observer observer) {
+    public void getUserProfile(String alias, UserTaskObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 alias, new GetUserHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -42,14 +29,14 @@ public class UserService {
 
         observer.displayMessage("Getting user's profile...");
     }
-    public void loginUser(String alias, String password, Observer observer) {
+    public void loginUser(String alias, String password, LoginPresenter.LoginUserObserver observer) {
         // Send the login request.
         LoginTask loginTask = new LoginTask(alias, password, new AuthenticateTaskHandler(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(loginTask);
     }
 
-    public void registerUser(String firstName, String lastName, String alias, String password, String imageBytesBase64, Observer observer) {
+    public void registerUser(String firstName, String lastName, String alias, String password, String imageBytesBase64, RegisterPresenter.RegisterObserver observer) {
         RegisterTask registerTask = new RegisterTask(firstName, lastName, alias, password, imageBytesBase64, new AuthenticateTaskHandler(observer));
 
         ExecutorService executor = Executors.newSingleThreadExecutor();

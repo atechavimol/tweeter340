@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CheckFollowerObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountTaskObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -150,7 +151,7 @@ public class MainPresenter {
         }
     }
     
-    public class IsFollowerObserver implements FollowService.isFollowerObserver {
+    public class IsFollowerObserver implements CheckFollowerObserver {
 
         @Override
         public void setFollowButton(boolean isFollower) {
@@ -176,20 +177,9 @@ public class MainPresenter {
         }
 
 
-//
-//        @Override
-//        public void update(Boolean b) {
-//            view.updateFollowUnfollow(b);
-//
-//        }
     }
 
-    public class LogoutObserver implements UserService.LogoutObserver {
-//
-//        @Override
-//        public void logout() {
-//            view.logout();
-//        }
+    public class LogoutObserver implements SimpleNotificationObserver {
 
         @Override
         public void displayMessage(String s) {
@@ -208,20 +198,6 @@ public class MainPresenter {
             view.displayMessage(s);
         }
 
-//        @Override
-//        public void setFollowerCount(int count) {
-//            view.setFollowerCount(count);
-//        }
-//
-//        @Override
-//        public void setFollowingCount(int count) {
-//            view.setFollowingCount(count);
-//        }
-//
-//        @Override
-//        public void handleSuccess(int count) {
-//
-//        }
 
         @Override
         public void setFollowing(int count) {
@@ -234,12 +210,7 @@ public class MainPresenter {
         }
     }
 
-    public class PostStatusObserver implements StatusService.PostStatusObserver {
-
-//        @Override
-//        public void update() {
-//
-//        }
+    public class PostStatusObserver implements SimpleNotificationObserver {
 
         @Override
         public void displayMessage(String s) {

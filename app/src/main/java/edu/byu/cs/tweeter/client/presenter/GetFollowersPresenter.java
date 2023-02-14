@@ -4,6 +4,8 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowersPresenter {
@@ -64,7 +66,7 @@ public class GetFollowersPresenter {
         userService.getUserProfile(alias, new GetUserObserver());
     }
 
-    public class GetFollowersObserver implements FollowService.Observer {
+    public class GetFollowersObserver implements PagedNotificationObserver {
         @Override
         public <T> void handleSuccess(List<T> items, Boolean hasMorePages) {
             isLoading = false;
@@ -81,32 +83,8 @@ public class GetFollowersPresenter {
             view.displayMessage(message);
         }
 
-//        @Override
-//        public void displayError(String message) {
-//            isLoading = false;
-//            view.setLoadingFooter(false);
-//            view.displayMessage(message);
-//
-//        }
-//
-//        @Override
-//        public void displayException(Exception ex) {
-//            isLoading = false;
-//            view.setLoadingFooter(false);
-//            view.displayMessage(ex.getMessage());
-//
-//        }
-//
-//        @Override
-//        public void addFollows(List<User> followers, boolean hasMorePages) {
-//            isLoading = false;
-//            view.setLoadingFooter(false);
-//            lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
-//            setHasMorePages(hasMorePages);
-//            view.addMoreItems(followers);
-//        }
     }
-    public class GetUserObserver implements UserService.Observer {
+    public class GetUserObserver implements UserTaskObserver {
 
         @Override
         public void startActivity(User user) {

@@ -8,7 +8,6 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 
 public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends Handler {
@@ -35,7 +34,6 @@ public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends H
             observer.displayMessage("Failed because of exception: " + ex.getMessage());
         }
 
-       // observer.enableFollowButton(true);
     }
 
     protected abstract void handleSuccessMessage(T observer, Bundle data);

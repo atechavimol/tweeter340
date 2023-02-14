@@ -1,8 +1,5 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
-import static edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask.ITEMS_KEY;
-import static edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask.MORE_PAGES_KEY;
-
 import android.os.Bundle;
 
 import java.util.List;

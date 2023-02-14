@@ -4,6 +4,7 @@ package edu.byu.cs.tweeter.client.presenter;
 import android.widget.ImageView;
 
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class RegisterPresenter {
@@ -69,7 +70,7 @@ public class RegisterPresenter {
         }
     }
 
-    public class RegisterObserver implements UserService.Observer {
+    public class RegisterObserver implements UserTaskObserver {
 
         @Override
         public void startActivity(User user) {

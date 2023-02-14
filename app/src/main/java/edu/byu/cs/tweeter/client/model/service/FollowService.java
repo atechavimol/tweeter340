@@ -17,58 +17,23 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollower
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountTaskObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CheckFollowerObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
+import edu.byu.cs.tweeter.client.presenter.GetFollowersPresenter;
+import edu.byu.cs.tweeter.client.presenter.GetFollowingPresenter;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService {
-
-
-    public interface Observer extends PagedNotificationObserver {
-//
-//        void displayError(String message);
-//
-//        void displayException(Exception ex);
-//
-//        void addFollows(List<User> follows, boolean hasMorePages);
-    }
-
-    public interface isFollowerObserver extends IsFollowerObserver {
-
-        void setFollowButton(boolean isFollower);
-
-        void displayMessage(String s);
-
-    }
-
-    public interface FollowUnfollowObserver extends SimpleNotificationObserver {
-
-//        void update(boolean b);
-//
-//        void displayMessage(String s);
-//
-//        void enableFollowButton(boolean b);
-    }
-
-    public interface CountObserver extends CountTaskObserver {
-
-//        void displayMessage(String s);
-//
-//        void setFollowerCount(int count);
-//
-//        void setFollowingCount(int count);
-    }
-
-    public void loadMoreItems(User user, int pageSize, User lastFollowee, Observer observer) {
+    public void loadMoreItems(User user, int pageSize, User lastFollowee, GetFollowingPresenter.GetFollowingObserver observer) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastFollowee, new PagedNotificationHandler<User>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowingTask);
     }
 
-    public void loadMoreFollowers(User user, int pageSize, User lastFollower, Observer observer) {
+    public void loadMoreFollowers(User user, int pageSize, User lastFollower, GetFollowersPresenter.GetFollowersObserver observer) {
         GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastFollower, new PagedNotificationHandler<User>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();

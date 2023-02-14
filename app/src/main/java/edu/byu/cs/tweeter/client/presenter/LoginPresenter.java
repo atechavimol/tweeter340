@@ -1,6 +1,7 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class LoginPresenter {
@@ -30,7 +31,7 @@ public class LoginPresenter {
             view.setErrorView(null);
             
             view.loginToast("Logging In...");
-            userService.loginUser(alias, password, new LoginPresenter.LoginUserObserver());
+            userService.loginUser(alias, password, new LoginUserObserver());
 
         } catch (Exception e) {
             view.setErrorView(e.getMessage());
@@ -49,7 +50,7 @@ public class LoginPresenter {
         }
     }
     
-    public class LoginUserObserver implements UserService.Observer {
+    public class LoginUserObserver implements UserTaskObserver {
 
         @Override
         public void startActivity(User user) {
