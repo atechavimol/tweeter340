@@ -2,62 +2,21 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.FollowService;
-import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class GetFollowingPresenter {
-    private static final int PAGE_SIZE = 10;
-
-    public interface View {
-        void setLoadingFooter(boolean status);
-
-        void displayMessage(String message);
-
-        void addMoreItems(List<User> followees);
-
-        void startActivity(User user);
-    }
-
-    private View view;
-
-    private FollowService followService;
-    private UserService userService;
-
-    private User lastFollowee;
-    private boolean hasMorePages;
-
-    public boolean isLoading() {
-        return isLoading;
-    }
-
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
-    public boolean hasMorePages() {
-        return hasMorePages;
-    }
-
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
-    }
-
-
-    private boolean isLoading = false;
+public class GetFollowingPresenter extends PagedPresenter<User> {
 
     public GetFollowingPresenter(View view) {
-        this.view = view;
-        followService = new FollowService();
-        userService = new UserService();
+        super(view);
     }
 
     public void loadMoreItems(User user) {
         if (!isLoading) {
             isLoading = true;
             view.setLoadingFooter(true);
-            followService.loadMoreItems(user, PAGE_SIZE, lastFollowee, new GetFollowingObserver());
+            followService.loadMoreItems(user, PAGE_SIZE, last, new GetFollowingObserver());
         }
     }
 
@@ -70,7 +29,7 @@ public class GetFollowingPresenter {
         public <T> void handleSuccess(List<T> items, Boolean hasMorePages) {
             isLoading = false;
             view.setLoadingFooter(false);
-            lastFollowee = (items.size() > 0) ? (User) items.get(items.size() - 1) : null;
+            last = (items.size() > 0) ? (User) items.get(items.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.addMoreItems((List<User>) items);
         }

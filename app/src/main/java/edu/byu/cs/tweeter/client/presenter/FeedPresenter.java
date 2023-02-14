@@ -2,62 +2,15 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.StatusService;
-import edu.byu.cs.tweeter.client.model.service.UserService;
-
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FeedPresenter {
-    private static final int PAGE_SIZE = 10;
-
-    public interface View {
-
-        void startActivity(User user);
-
-        void displayMessage(String s);
-
-        void setLoadingFooter(boolean b);
-
-        void addMoreItems(List<Status> statuses);
-    }
-
-    private View view;
-    private UserService userService;
-    private StatusService statusService;
-
-
-    private Status lastStatus;
-
-    private boolean hasMorePages;
-    private boolean isLoading = false;
-
-    public boolean hasMorePages() {
-        return hasMorePages;
-    }
-
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
-    }
-
-    public boolean isLoading() {
-        return isLoading;
-    }
-
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
+public class FeedPresenter extends PagedPresenter<Status>{
 
     public FeedPresenter(View view) {
-        this.view = view;
-        userService = new UserService();
-        statusService = new StatusService();
-    }
-
-    public void getUserProfile(String alias) {
-        userService.getUserProfile(alias, new GetUserObserver() );
+        super(view);
     }
 
     public void loadMoreItems(User user) {
@@ -65,8 +18,12 @@ public class FeedPresenter {
             isLoading = true;
             view.setLoadingFooter(true);
 
-            statusService.getFeed(user, PAGE_SIZE, lastStatus, new GetFeedObserver());
+            statusService.getFeed(user, PAGE_SIZE, last, new GetFeedObserver());
         }
+    }
+
+    public void getUserProfile(String alias) {
+        userService.getUserProfile(alias, new FeedPresenter.GetUserObserver() );
     }
 
     public class GetUserObserver implements UserTaskObserver {
@@ -88,7 +45,7 @@ public class FeedPresenter {
             isLoading = false;
             view.setLoadingFooter(false);
 
-            lastStatus = (items.size() > 0) ? (Status) items.get(items.size() - 1) : null;
+            last = (items.size() > 0) ? (Status) items.get(items.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.addMoreItems((List<Status>) items);
         }

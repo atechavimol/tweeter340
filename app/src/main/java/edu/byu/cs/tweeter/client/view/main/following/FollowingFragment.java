@@ -25,13 +25,14 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.presenter.GetFollowingPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * Implements the "Following" tab.
  */
-public class FollowingFragment extends Fragment implements GetFollowingPresenter.View {
+public class FollowingFragment extends Fragment implements PagedPresenter.View {
 
     private static final String LOG_TAG = "FollowingFragment";
     private static final String USER_KEY = "UserKey";
@@ -96,15 +97,17 @@ public class FollowingFragment extends Fragment implements GetFollowingPresenter
     }
 
     @Override
+    public <T> void addMoreItems(List<T> items) {
+        followingRecyclerViewAdapter.addItems((List<User>) items);
+
+    }
+
+    @Override
     public void displayMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
 
     }
 
-    @Override
-    public void addMoreItems(List<User> followees) {
-        followingRecyclerViewAdapter.addItems(followees);
-    }
 
     @Override
     public void startActivity(User user) {

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.R;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.client.presenter.StoryPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -39,7 +40,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Story" tab.
  */
-public class StoryFragment extends Fragment implements StoryPresenter.View{
+public class StoryFragment extends Fragment implements PagedPresenter.View{
     private static final String LOG_TAG = "StoryFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -116,9 +117,11 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
     }
 
     @Override
-    public void addMoreItems(List<Status> statuses) {
-        storyRecyclerViewAdapter.addItems(statuses);
+    public <T> void addMoreItems(List<T> items) {
+        storyRecyclerViewAdapter.addItems((List<Status>) items);
+
     }
+
 
     /**
      * The ViewHolder for the RecyclerView that displays the story data.
