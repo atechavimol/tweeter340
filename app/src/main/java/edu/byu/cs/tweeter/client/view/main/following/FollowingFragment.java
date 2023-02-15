@@ -32,7 +32,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Following" tab.
  */
-public class FollowingFragment extends Fragment implements PagedPresenter.View {
+public class FollowingFragment extends Fragment implements PagedPresenter.PagedView {
 
     private static final String LOG_TAG = "FollowingFragment";
     private static final String USER_KEY = "UserKey";

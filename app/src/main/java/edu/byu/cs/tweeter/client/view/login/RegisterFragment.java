@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.presenter.AuthenticatePresenter;
 import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -31,7 +32,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the register screen.
  */
-public class RegisterFragment extends Fragment implements RegisterPresenter.View {
+public class RegisterFragment extends Fragment implements AuthenticatePresenter.AuthenticateView {
     private static final String LOG_TAG = "RegisterFragment";
     private static final int RESULT_IMAGE = 10;
     private RegisterPresenter presenter;
@@ -130,19 +131,9 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
     }
 
     @Override
-    public void registeringToast(String s) {
+    public void showToast(String s) {
         registeringToast = Toast.makeText(getContext(), "Registering...", Toast.LENGTH_LONG);
         registeringToast.show();
     }
 
-    @Override
-    public String getImageByteString() {
-        Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-        byte[] imageBytes = bos.toByteArray();
-
-        String imageBytesBase64 = Base64.getEncoder().encodeToString(imageBytes);
-        return imageBytesBase64;
-    }
 }

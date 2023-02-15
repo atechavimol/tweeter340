@@ -1,51 +1,36 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.widget.ImageView;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class RegisterPresenter {
-
-    public interface View {
-
-        void startActivity(User user);
-
-        void displayMessage(String s);
-
-        void setErrorView(String s);
-
-        void registeringToast(String s);
-
-        String getImageByteString();
-    }
-
-    View view;
-    UserService userService;
-
-    public RegisterPresenter(View view){
-        this.view = view;
-        userService = new UserService();
+public class RegisterPresenter extends AuthenticatePresenter{
+    public RegisterPresenter(AuthenticateView view){
+        super(view);
     }
 
     public void registerUser(String firstName, String lastName, String alias, String password, ImageView imageToUpload) {
         try {
             validateRegistration(firstName, lastName, alias, password, imageToUpload);
-            view.setErrorView(null);
+            ((AuthenticateView)view).setErrorView(null);
+            ((AuthenticateView)view).showToast("Registering...");
 
-            view.registeringToast("Registering...");
-
-            String imageString = view.getImageByteString();
-            userService.registerUser(firstName, lastName, alias, password, imageString, new RegisterObserver());
+            userService.registerUser(firstName, lastName, alias, password, getImageString(imageToUpload), new RegisterObserver());
 
         } catch (Exception e) {
-            view.setErrorView(e.getMessage());
+            ((AuthenticateView)view).setErrorView(e.getMessage());
         }
     }
 
-    public void validateRegistration(String firstName, String lastName, String alias, String password, ImageView imageToUpload) {
+    private void validateRegistration(String firstName, String lastName, String alias, String password, ImageView imageToUpload) {
         if (firstName.length() == 0) {
             throw new IllegalArgumentException("First Name cannot be empty.");
         }
@@ -70,11 +55,22 @@ public class RegisterPresenter {
         }
     }
 
+    private String getImageString(ImageView imageToUpload) {
+
+        Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+        byte[] imageBytes = bos.toByteArray();
+
+        String imageBytesBase64 = Base64.getEncoder().encodeToString(imageBytes);
+        return  imageBytesBase64;
+    }
+
     public class RegisterObserver implements UserTaskObserver {
 
         @Override
         public void startActivity(User user) {
-            view.startActivity(user);
+            ((AuthenticateView)view).startActivity(user);
         }
 
         @Override

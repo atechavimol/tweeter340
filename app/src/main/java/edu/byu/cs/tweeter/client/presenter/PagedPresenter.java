@@ -9,33 +9,32 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNoti
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public abstract class PagedPresenter<T>  {
+public abstract class PagedPresenter<T>  extends Presenter {
 
     protected static final int PAGE_SIZE = 10;
     protected T last;
     protected boolean isLoading = false;
     protected boolean hasMorePages;
+
     protected StatusService statusService;
     protected UserService userService;
     protected FollowService followService;
-    protected View view;
 
-    public PagedPresenter(View view) {
-        statusService = new StatusService();
-        userService = new UserService();
-        followService = new FollowService();
-        this.view = view;
-    }
-
-    public interface View {
+    public interface PagedView extends Presenter.View {
 
         void startActivity(User user);
-
-        void displayMessage(String s);
 
         void setLoadingFooter(boolean b);
 
         <T> void addMoreItems(List<T> items);
+    }
+
+    public PagedPresenter(PagedView view) {
+        super(view);
+        statusService = new StatusService();
+        userService = new UserService();
+        followService = new FollowService();
+
     }
 
     public void getUserProfile(String alias) {
@@ -45,7 +44,7 @@ public abstract class PagedPresenter<T>  {
     public void loadMoreItems(User user) {
         if (!isLoading) {
             isLoading = true;
-            view.setLoadingFooter(true);
+            ((PagedView)view).setLoadingFooter(true);
             getItems(user, PAGE_SIZE, last);
         }
     }
@@ -57,7 +56,7 @@ public abstract class PagedPresenter<T>  {
 
         @Override
         public void startActivity(User user) {
-            view.startActivity(user);
+            ((PagedView)view).startActivity(user);
         }
 
         @Override
@@ -70,16 +69,16 @@ public abstract class PagedPresenter<T>  {
         @Override
         public void handleSuccess(List<T> items, Boolean hasMorePages) {
             isLoading = false;
-            view.setLoadingFooter(false);
+            ((PagedView)view).setLoadingFooter(false);
             last = (items.size() > 0) ? items.get(items.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.addMoreItems((List<T>) items);
+            ((PagedView)view).addMoreItems((List<T>) items);
         }
 
         @Override
         public void displayMessage(String message) {
             isLoading = false;
-            view.setLoadingFooter(false);
+            ((PagedView)view).setLoadingFooter(false);
             view.displayMessage(message);
         }
 

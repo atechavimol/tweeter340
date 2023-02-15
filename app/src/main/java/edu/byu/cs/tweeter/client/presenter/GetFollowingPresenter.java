@@ -4,7 +4,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowingPresenter extends PagedPresenter<User> {
 
-    public GetFollowingPresenter(View view) {
+    public GetFollowingPresenter(PagedView view) {
         super(view);
     }
 

@@ -4,37 +4,21 @@ import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class LoginPresenter {
-
-    public interface View {
-
-        void displayMessage(String s);
-
-        void setErrorView(String message);
-
-        void startActivity(User user);
-
-        void loginToast(String s);
-    }
-
-    View view;
-    UserService userService;
-
-    public LoginPresenter(View view) {
-        this.view = view;
-        userService = new UserService();
+public class LoginPresenter extends AuthenticatePresenter{
+    public LoginPresenter(AuthenticateView view) {
+        super(view);
     }
 
     public void loginUser(String alias, String password) {
         try {
             validateLogin(alias, password);
-            view.setErrorView(null);
-            
-            view.loginToast("Logging In...");
+            ((AuthenticateView)view).setErrorView(null);
+
+            ((AuthenticateView)view).showToast("Logging In...");
             userService.loginUser(alias, password, new LoginUserObserver());
 
         } catch (Exception e) {
-            view.setErrorView(e.getMessage());
+            ((AuthenticateView)view).setErrorView(e.getMessage());
         }
     }
 
@@ -54,7 +38,7 @@ public class LoginPresenter {
 
         @Override
         public void startActivity(User user) {
-            view.startActivity(user);
+            ((AuthenticateView)view).startActivity(user);
         }
 
         @Override

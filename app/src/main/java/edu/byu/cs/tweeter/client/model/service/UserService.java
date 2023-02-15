@@ -20,7 +20,6 @@ import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
 
 public class UserService {
 
-
     public void getUserProfile(String alias, UserTaskObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 alias, new GetUserHandler(observer));
@@ -48,6 +47,5 @@ public class UserService {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }
-
 
 }

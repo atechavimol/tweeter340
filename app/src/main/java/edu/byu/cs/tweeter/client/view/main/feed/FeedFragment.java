@@ -40,7 +40,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Feed" tab.
  */
-public class FeedFragment extends Fragment implements PagedPresenter.View {
+public class FeedFragment extends Fragment implements PagedPresenter.PagedView {
     private static final String LOG_TAG = "FeedFragment";
     private static final String USER_KEY = "UserKey";
 

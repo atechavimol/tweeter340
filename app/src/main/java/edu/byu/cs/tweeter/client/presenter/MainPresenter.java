@@ -19,18 +19,17 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNot
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class MainPresenter {
+public class MainPresenter extends Presenter{
     private static final String LOG_TAG = "MainActivity";
 
 
-    public interface View {
+    public interface MainView extends Presenter.View {
 
         void setFollowButton(boolean isFollower);
 
         void displayMessage(String s);
 
         void updateFollowUnfollow();
-
 
         void logout();
 
@@ -48,7 +47,7 @@ public class MainPresenter {
     StatusService statusService;
     
     public MainPresenter(View view) {
-        this.view = view;
+        super(view);
         followService = new FollowService();
         userService = new UserService();
         statusService = new StatusService();
@@ -155,7 +154,7 @@ public class MainPresenter {
 
         @Override
         public void setFollowButton(boolean isFollower) {
-            view.setFollowButton(isFollower);
+            ((MainView)view).setFollowButton(isFollower);
         }
 
         @Override
@@ -173,7 +172,7 @@ public class MainPresenter {
 
         @Override
         public void handleSuccess() {
-            view.updateFollowUnfollow();
+            ((MainView)view).updateFollowUnfollow();
         }
 
 
@@ -188,7 +187,7 @@ public class MainPresenter {
 
         @Override
         public void handleSuccess() {
-            view.logout();
+            ((MainView)view).logout();
         }
     }
     
@@ -201,12 +200,12 @@ public class MainPresenter {
 
         @Override
         public void setFollowing(int count) {
-            view.setFollowingCount(count);
+            ((MainView)view).setFollowingCount(count);
         }
 
         @Override
         public void setFollowers(int count) {
-            view.setFollowerCount(count);
+            ((MainView)view).setFollowerCount(count);
         }
     }
 
@@ -219,7 +218,7 @@ public class MainPresenter {
 
         @Override
         public void handleSuccess() {
-            view.cancelPostingToast();
+            ((MainView)view).cancelPostingToast();
             view.displayMessage("Successfully Posted!");
         }
     }
