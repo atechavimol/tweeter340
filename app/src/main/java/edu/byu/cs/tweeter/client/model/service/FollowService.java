@@ -17,23 +17,19 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollower
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountTaskObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CheckFollowerObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
-import edu.byu.cs.tweeter.client.presenter.GetFollowersPresenter;
-import edu.byu.cs.tweeter.client.presenter.GetFollowingPresenter;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService {
-    public void loadMoreItems(User user, int pageSize, User lastFollowee, GetFollowingPresenter.GetFollowingObserver observer) {
+    public void loadMoreFollowing(User user, int pageSize, User lastFollowee, PagedPresenter.GetItemsObserver observer) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastFollowee, new PagedNotificationHandler<User>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowingTask);
     }
 
-    public void loadMoreFollowers(User user, int pageSize, User lastFollower, GetFollowersPresenter.GetFollowersObserver observer) {
+    public void loadMoreFollowers(User user, int pageSize, User lastFollower, PagedPresenter.GetItemsObserver observer) {
         GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastFollower, new PagedNotificationHandler<User>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();

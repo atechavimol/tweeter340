@@ -14,29 +14,8 @@ public class StoryPresenter extends PagedPresenter<Status>{
     }
     @Override
     protected void getItems(User user, int pageSize, Status last) {
-        statusService.getStory(user, PAGE_SIZE, last, new GetStoryObserver());
+        statusService.getStory(user, PAGE_SIZE, last, new GetItemsObserver());
     }
-
-
-
-    public class GetStoryObserver implements PagedNotificationObserver {
-        @Override
-        public void displayMessage(String s) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            view.displayMessage(s);
-        }
-
-        @Override
-        public <T> void handleSuccess(List<T> items, Boolean hasMorePages) {
-            isLoading = false;
-            view.setLoadingFooter(false);
-            last = (items.size() > 0) ? (Status) items.get(items.size() - 1) : null;
-            setHasMorePages(hasMorePages);
-            view.addMoreItems((List<Status>) items);
-        }
-    }
-
 
 
 }

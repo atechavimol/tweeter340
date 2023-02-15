@@ -13,19 +13,20 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNoti
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.FeedPresenter;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.client.presenter.StoryPresenter;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class StatusService {
-    public void getFeed(User user, int pageSize, Status lastStatus, FeedPresenter.GetFeedObserver observer) {
+    public void getFeed(User user, int pageSize, Status lastStatus, PagedPresenter.GetItemsObserver observer) {
         GetFeedTask getFeedTask = new GetFeedTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastStatus, new PagedNotificationHandler<Status>(observer));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFeedTask);
     }
 
-    public void getStory(User user, int pageSize, Status lastStatus, StoryPresenter.GetStoryObserver observer) {
+    public void getStory(User user, int pageSize, Status lastStatus, PagedPresenter.GetItemsObserver observer) {
         GetStoryTask getStoryTask = new GetStoryTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastStatus, new PagedNotificationHandler<Status>(observer) );
         ExecutorService executor = Executors.newSingleThreadExecutor();

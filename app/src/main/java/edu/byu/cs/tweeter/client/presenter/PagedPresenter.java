@@ -5,10 +5,12 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public abstract class PagedPresenter<T>  {
+
     protected static final int PAGE_SIZE = 10;
     protected T last;
     protected boolean isLoading = false;
@@ -25,7 +27,6 @@ public abstract class PagedPresenter<T>  {
         this.view = view;
     }
 
-
     public interface View {
 
         void startActivity(User user);
@@ -40,6 +41,7 @@ public abstract class PagedPresenter<T>  {
     public void getUserProfile(String alias) {
         userService.getUserProfile(alias, new GetUserObserver() );
     }
+
     public void loadMoreItems(User user) {
         if (!isLoading) {
             isLoading = true;
@@ -62,6 +64,25 @@ public abstract class PagedPresenter<T>  {
         public void displayMessage(String s) {
             view.displayMessage(s);
         }
+    }
+
+    public class GetItemsObserver implements PagedNotificationObserver<T> {
+        @Override
+        public void handleSuccess(List<T> items, Boolean hasMorePages) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            last = (items.size() > 0) ? items.get(items.size() - 1) : null;
+            setHasMorePages(hasMorePages);
+            view.addMoreItems((List<T>) items);
+        }
+
+        @Override
+        public void displayMessage(String message) {
+            isLoading = false;
+            view.setLoadingFooter(false);
+            view.displayMessage(message);
+        }
+
     }
 
 
