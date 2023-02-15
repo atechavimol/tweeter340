@@ -3,7 +3,6 @@ package edu.byu.cs.tweeter.client.presenter;
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowersPresenter extends PagedPresenter<User>{
@@ -12,17 +11,11 @@ public class GetFollowersPresenter extends PagedPresenter<User>{
         super(view);
     }
 
-    public void loadMoreItems(User user) {
-        if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
-            isLoading = true;
-            view.setLoadingFooter(true);
-            followService.loadMoreFollowers(user, PAGE_SIZE, last, new GetFollowersObserver());
-        }
+    @Override
+    protected void getItems(User user, int pageSize, User last) {
+        followService.loadMoreFollowers(user, PAGE_SIZE, last, new GetFollowersObserver());
     }
 
-    public void getUserProfile(String alias) {
-        userService.getUserProfile(alias, new GetUserObserver());
-    }
 
     public class GetFollowersObserver implements PagedNotificationObserver {
         @Override
@@ -42,20 +35,6 @@ public class GetFollowersPresenter extends PagedPresenter<User>{
         }
 
     }
-    public class GetUserObserver implements UserTaskObserver {
-
-        @Override
-        public void startActivity(User user) {
-            view.startActivity(user);
-        }
-
-        @Override
-        public void displayMessage(String s) {
-           view.displayMessage(s);
-        }
-    }
-
-
 
 
 

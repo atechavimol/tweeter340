@@ -5,6 +5,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public abstract class PagedPresenter<T>  {
@@ -35,6 +36,34 @@ public abstract class PagedPresenter<T>  {
 
         <T> void addMoreItems(List<T> items);
     }
+
+    public void getUserProfile(String alias) {
+        userService.getUserProfile(alias, new GetUserObserver() );
+    }
+    public void loadMoreItems(User user) {
+        if (!isLoading) {
+            isLoading = true;
+            view.setLoadingFooter(true);
+            getItems(user, PAGE_SIZE, last);
+        }
+    }
+
+
+    protected abstract void getItems(User user, int pageSize, T last);
+
+    public class GetUserObserver implements UserTaskObserver {
+
+        @Override
+        public void startActivity(User user) {
+            view.startActivity(user);
+        }
+
+        @Override
+        public void displayMessage(String s) {
+            view.displayMessage(s);
+        }
+    }
+
 
     public boolean isLoading() {
         return isLoading;

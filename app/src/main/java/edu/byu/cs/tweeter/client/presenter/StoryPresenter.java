@@ -12,30 +12,12 @@ public class StoryPresenter extends PagedPresenter<Status>{
     public StoryPresenter(View view) {
         super(view);
     }
-
-    public void getUserProfile(String alias) {
-        userService.getUserProfile(alias,new GetUserObserver());
+    @Override
+    protected void getItems(User user, int pageSize, Status last) {
+        statusService.getStory(user, PAGE_SIZE, last, new GetStoryObserver());
     }
 
-    public void loadMoreItems(User user) {
-        if (!isLoading) {
-            isLoading = true;
-            view.setLoadingFooter(true);
-            statusService.getStory(user, PAGE_SIZE, last, new GetStoryObserver());
-        }
-    }
-    
-    public class GetUserObserver implements UserTaskObserver {
-        @Override
-        public void startActivity(User user) {
-            view.startActivity(user);
-        }
 
-        @Override
-        public void displayMessage(String s) {
-            view.displayMessage(s);
-        }
-    }
 
     public class GetStoryObserver implements PagedNotificationObserver {
         @Override
@@ -54,5 +36,7 @@ public class StoryPresenter extends PagedPresenter<Status>{
             view.addMoreItems((List<Status>) items);
         }
     }
+
+
 
 }

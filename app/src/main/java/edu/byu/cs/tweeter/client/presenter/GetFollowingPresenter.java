@@ -12,16 +12,9 @@ public class GetFollowingPresenter extends PagedPresenter<User> {
         super(view);
     }
 
-    public void loadMoreItems(User user) {
-        if (!isLoading) {
-            isLoading = true;
-            view.setLoadingFooter(true);
-            followService.loadMoreItems(user, PAGE_SIZE, last, new GetFollowingObserver());
-        }
-    }
-
-    public void getUserProfile(String alias) {
-        userService.getUserProfile(alias, new GetUserObserver());
+    @Override
+    protected void getItems(User user, int pageSize, User last) {
+        followService.loadMoreItems(user, PAGE_SIZE, last, new GetFollowingObserver());
     }
 
     public class GetFollowingObserver implements PagedNotificationObserver {
@@ -42,16 +35,4 @@ public class GetFollowingPresenter extends PagedPresenter<User> {
         }
     }
 
-    public class GetUserObserver implements UserTaskObserver {
-
-        @Override
-        public void startActivity(User user) {
-            view.startActivity(user);
-        }
-
-        @Override
-        public void displayMessage(String s) {
-            view.displayMessage(s);
-        }
-    }
 }
