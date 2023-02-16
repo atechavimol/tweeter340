@@ -1,9 +1,7 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTaskUtils;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
@@ -15,34 +13,27 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskO
 import edu.byu.cs.tweeter.client.presenter.AuthenticatePresenter;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 
-public class UserService {
+public class UserService{
 
     public void getUserProfile(String alias, UserTaskObserver observer) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 alias, new GetUserHandler(observer));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getUserTask);
-
+        BackgroundTaskUtils.runTask(getUserTask);
         observer.displayMessage("Getting user's profile...");
     }
     public void loginUser(String alias, String password, UserTaskObserver observer) {
-        // Send the login request.
         LoginTask loginTask = new LoginTask(alias, password, new AuthenticateTaskHandler(observer));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(loginTask);
+        BackgroundTaskUtils.runTask(loginTask);
     }
 
     public void registerUser(String firstName, String lastName, String alias, String password, String imageBytesBase64, AuthenticatePresenter.UserObserver observer) {
         RegisterTask registerTask = new RegisterTask(firstName, lastName, alias, password, imageBytesBase64, new AuthenticateTaskHandler(observer));
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(registerTask);
+        BackgroundTaskUtils.runTask(registerTask);
     }
 
     public void logoutUser(MainPresenter.LogoutObserver logoutObserver) {
         LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new SimpleNotificationHandler(logoutObserver) );
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(logoutTask);
+        BackgroundTaskUtils.runTask(logoutTask);
     }
 
 }
