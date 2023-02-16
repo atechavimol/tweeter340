@@ -1,8 +1,5 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserTaskObserver;
-import edu.byu.cs.tweeter.model.domain.User;
 
 public class LoginPresenter extends AuthenticatePresenter{
     public LoginPresenter(AuthenticateView view) {
@@ -15,7 +12,7 @@ public class LoginPresenter extends AuthenticatePresenter{
             ((AuthenticateView)view).setErrorView(null);
 
             ((AuthenticateView)view).showToast("Logging In...");
-            userService.loginUser(alias, password, new LoginUserObserver());
+            userService.loginUser(alias, password, new UserObserver());
 
         } catch (Exception e) {
             ((AuthenticateView)view).setErrorView(e.getMessage());
@@ -33,19 +30,7 @@ public class LoginPresenter extends AuthenticatePresenter{
             throw new IllegalArgumentException("Password cannot be empty.");
         }
     }
-    
-    public class LoginUserObserver implements UserTaskObserver {
 
-        @Override
-        public void startActivity(User user) {
-            ((AuthenticateView)view).startActivity(user);
-        }
-
-        @Override
-        public void displayMessage(String s) {
-            view.displayMessage(s);
-        }
-    }
 
 
 }

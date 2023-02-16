@@ -24,8 +24,6 @@ public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends H
         boolean success = msg.getData().getBoolean(BackgroundTask.SUCCESS_KEY);
         if (success) {
             handleSuccessMessage(observer, msg.getData());
-            //
-
         } else if (msg.getData().containsKey(BackgroundTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(BackgroundTask.MESSAGE_KEY);
             observer.displayMessage("Failed: " + message);

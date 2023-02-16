@@ -27,8 +27,6 @@ public class MainPresenter extends Presenter{
 
         void setFollowButton(boolean isFollower);
 
-        void displayMessage(String s);
-
         void updateFollowUnfollow();
 
         void logout();
@@ -39,9 +37,7 @@ public class MainPresenter extends Presenter{
 
         void cancelPostingToast();
     }
-    
-    View view;
-    
+
     FollowService followService;
     UserService userService;
     StatusService statusService;
