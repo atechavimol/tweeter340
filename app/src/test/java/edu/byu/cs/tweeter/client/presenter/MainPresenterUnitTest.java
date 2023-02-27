@@ -99,57 +99,6 @@ public class MainPresenterUnitTest {
         Mockito.verify(mockView).displayMessage(ArgumentMatchers.startsWith("Failed with exception:"));
     }
 
-
-
-
 }
-//public class MainPresenterUnitTest {
-//
-//    private MainPresenter.MainView mockView;
-//    private UserService mockUserService;
-//    private Cache mockCache;
-//    private  MainPresenter mainPresenterSpy;
-//
-//    @BeforeEach
-//    public void setup() {
-//        // Create mocks
-//        mockView = Mockito.mock(MainPresenter.MainView.class);
-//        mockUserService = Mockito.mock(UserService.class);
-//        mockCache = Mockito.mock(Cache.class);
-//
-//        mainPresenterSpy = Mockito.spy( new MainPresenter(mockView));
-//        Mockito.doReturn(mockUserService).when(mainPresenterSpy).getUserService();
-//
-//        Cache.setInstance(mockCache);
-//    }
-//
-//    @Test
-//    @DisplayName("logoutSuccessful")
-//    public void testLogout_logoutSuccessful(){
-//
-//        Answer<Void> answer = new Answer<>() {
-//            @Override
-//            public Void answer(InvocationOnMock invocation) throws Throwable {
-//               MainPresenter.LogoutObserver observer = invocation.getArgument(0, MainPresenter.LogoutObserver.class);
-//               observer.handleSuccess();
-//               return null;
-//            }
-//        };
-//
-//        Mockito.doAnswer(answer).when(mockUserService).logoutUser(Mockito.any());
-//        mainPresenterSpy.logoutUser();
-//
-//
-//
-//        Mockito.verify(mockView).logout();
-//        Mockito.verify(mockCache).clearCache();
-//    }
-//
-//    @Test
-//    @DisplayName("logoutFailedWithMessage")
-//    public void testLogout_logoutFailedWithMessage() {
-//
-//    }}
-//
 
 
