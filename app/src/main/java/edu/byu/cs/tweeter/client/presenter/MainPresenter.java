@@ -45,8 +45,20 @@ public class MainPresenter extends Presenter{
     public MainPresenter(View view) {
         super(view);
         followService = new FollowService();
-        userService = new UserService();
-        statusService = new StatusService();
+    }
+
+    protected UserService getUserService() {
+        if(userService == null) {
+            userService = new UserService();
+        }
+        return userService;
+    }
+
+    protected StatusService getStatusService() {
+        if(statusService == null) {
+            statusService = new StatusService();
+        }
+        return statusService;
     }
 
     public void isFollower(User selectedUser) {
@@ -64,7 +76,7 @@ public class MainPresenter extends Presenter{
     }
 
     public void logoutUser() {
-        userService.logoutUser(new LogoutObserver());
+        getUserService().logoutUser(new LogoutObserver());
     }
 
     public void updateFollowingAndFollowers(User selectedUser) {
@@ -74,7 +86,7 @@ public class MainPresenter extends Presenter{
     public void postStatus(String post) {
         try {
             Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), getFormattedDateTime(), parseURLs(post), parseMentions(post));
-            statusService.postStatus(newStatus, new PostStatusObserver());
+            getStatusService().postStatus(newStatus, new PostStatusObserver());
 
         } catch (Exception ex) {
             Log.e(LOG_TAG, ex.getMessage(), ex);
