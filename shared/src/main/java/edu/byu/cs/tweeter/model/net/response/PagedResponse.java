@@ -1,9 +1,11 @@
 package edu.byu.cs.tweeter.model.net.response;
 
+import java.util.List;
+
 /**
  * A response that can indicate whether there is more data available from the server.
  */
-public class PagedResponse extends Response {
+public abstract class PagedResponse<T> extends Response {
 
     private final boolean hasMorePages;
 
@@ -27,4 +29,8 @@ public class PagedResponse extends Response {
     public boolean getHasMorePages() {
         return hasMorePages;
     }
+
+    public abstract List<T> getItems();
+
+
 }

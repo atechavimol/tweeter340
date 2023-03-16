@@ -9,7 +9,8 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 
 public abstract class PagedTask<T> extends AuthenticatedTask {
 
@@ -20,19 +21,19 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
      * The user whose items are being retrieved.
      * (This can be any user, not just the currently logged-in user.)
      */
-    private final User targetUser;
+    protected User targetUser;
 
     /**
      * Maximum number of statuses to return (i.e., page size).
      */
 
-    private final int limit;
+    protected final int limit;
 
     /**
      * The last status returned in the previous page of results (can be null).
      * This allows the new page to begin where the previous page ended.
      */
-    private final T lastItem;
+    protected final T lastItem;
 
     /**
      * The items returned in the current page of results.
@@ -64,19 +65,19 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     }
 
     @Override
-    protected final void runTask() throws IOException {
-        Pair<List<T>, Boolean> pageOfItems = getItems();
+    protected final void runTask() throws IOException, TweeterRemoteException {
+        PagedResponse response = processRequest();
+        items = response.getItems();
+        hasMorePages = response.getHasMorePages();
 
-        items = pageOfItems.getFirst();
-        hasMorePages = pageOfItems.getSecond();
-
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+        if(response.isSuccess()) {
+            sendSuccessMessage();
+        } else {
+            sendFailedMessage(response.getMessage());
+        }
     }
 
-    protected abstract Pair<List<T>, Boolean> getItems();
+    protected abstract PagedResponse processRequest() throws IOException, TweeterRemoteException;
 
     protected abstract List<User> getUsersForItems(List<T> items);
 
