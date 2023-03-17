@@ -32,7 +32,7 @@ public class GetUserTask extends AuthenticatedTask {
 
     @Override
     protected void runTask() throws IOException, TweeterRemoteException {
-        GetUserRequest request = new GetUserRequest(alias);
+        GetUserRequest request = new GetUserRequest(alias, authToken);
         GetUserResponse response = getServerFacade().getUser(request, "/getuser");
 
         if(response.isSuccess()) {

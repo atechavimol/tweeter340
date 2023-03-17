@@ -26,7 +26,7 @@ public class FollowTask extends AuthenticatedTask {
 
     @Override
     protected void runTask() throws IOException, TweeterRemoteException {
-        FollowRequest request = new FollowRequest(followee);
+        FollowRequest request = new FollowRequest(followee, authToken);
         FollowResponse response = getServerFacade().follow(request, "/follow");
 
         if(response.isSuccess()){

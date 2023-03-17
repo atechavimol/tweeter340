@@ -27,7 +27,7 @@ public class UnfollowTask extends AuthenticatedTask {
 
     @Override
     protected void runTask() throws IOException, TweeterRemoteException {
-        UnfollowRequest request = new UnfollowRequest(followee);
+        UnfollowRequest request = new UnfollowRequest(followee, authToken);
         UnfollowResponse response = getServerFacade().unfollow(request, "/unfollow");
 
         if(response.isSuccess()) {
