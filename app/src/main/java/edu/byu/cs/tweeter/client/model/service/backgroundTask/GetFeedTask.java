@@ -2,9 +2,14 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FeedRequest;
+import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 
 /**
@@ -18,8 +23,13 @@ public class GetFeedTask extends PagedStatusTask {
     }
 
     @Override
-    protected PagedResponse processRequest() {
-       //return getFakeData().getPageOfStatus(getLastItem(), getLimit());
-        return null;
+    protected PagedResponse processRequest() throws IOException, TweeterRemoteException {
+        String targetUserAlias = targetUser == null ? null : targetUser.getAlias();
+        Integer lastStatusHash = lastItem == null ? null : lastItem.hashCode();
+
+
+        FeedRequest request = new FeedRequest(authToken, targetUserAlias, limit, lastStatusHash);
+        FeedResponse response = getServerFacade().getFeed(request, "/feed");
+        return response;
     }
 }

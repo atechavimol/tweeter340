@@ -2,8 +2,13 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 
 /**
@@ -17,7 +22,12 @@ public class GetFollowersTask extends PagedUserTask {
     }
 
     @Override
-    protected PagedResponse processRequest() {
-        return null;
+    protected PagedResponse processRequest() throws IOException, TweeterRemoteException {
+        String targetUserAlias = targetUser == null ? null : targetUser.getAlias();
+        String lastFollowerAlias = lastItem == null ? null : lastItem.getAlias();
+
+        FollowerRequest request = new FollowerRequest(authToken, targetUserAlias, limit, lastFollowerAlias);
+
+        return getServerFacade().getFollowers(request, "/follower");
     }
 }

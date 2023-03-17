@@ -38,7 +38,7 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     /**
      * The items returned in the current page of results.
      */
-    private List<T> items;
+    private List items;
 
     /**
      * Indicates whether there are more pages of items that can be retrieved on subsequent calls.
@@ -67,10 +67,10 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     @Override
     protected final void runTask() throws IOException, TweeterRemoteException {
         PagedResponse response = processRequest();
-        items = response.getItems();
-        hasMorePages = response.getHasMorePages();
 
         if(response.isSuccess()) {
+            items = response.getItems();
+            hasMorePages = response.getHasMorePages();
             sendSuccessMessage();
         } else {
             sendFailedMessage(response.getMessage());

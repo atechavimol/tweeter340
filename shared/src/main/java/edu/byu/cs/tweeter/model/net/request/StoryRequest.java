@@ -1,21 +1,20 @@
 package edu.byu.cs.tweeter.model.net.request;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 
-public class FollowerRequest {
+public class StoryRequest {
     private AuthToken authToken;
     private String targetUserAlias;
     private int limit;
-    private String lastFollowerAlias;
+    private Integer lastStatusHash;
 
-    private FollowerRequest(){}
+    private StoryRequest(){}
 
-    public FollowerRequest(AuthToken authToken, String targetUserAlias, int limit, String lastFollowerAlias) {
+    public StoryRequest(AuthToken authToken, String targetUserAlias, int limit, Integer lastStatusHash) {
         this.authToken = authToken;
         this.targetUserAlias = targetUserAlias;
         this.limit = limit;
-        this.lastFollowerAlias = lastFollowerAlias;
+        this.lastStatusHash = lastStatusHash;
     }
 
     public AuthToken getAuthToken() {
@@ -42,11 +41,11 @@ public class FollowerRequest {
         this.limit = limit;
     }
 
-    public String getLastFollowerAlias() {
-        return lastFollowerAlias;
+    public int getLastStatusHash() {
+        return lastStatusHash;
     }
 
-    public void setLastFollowerAlias(String lastFollowerAlias) {
-        this.lastFollowerAlias = lastFollowerAlias;
+    public void setLastStatusHash(int lastStatusHash) {
+        this.lastStatusHash = lastStatusHash;
     }
 }

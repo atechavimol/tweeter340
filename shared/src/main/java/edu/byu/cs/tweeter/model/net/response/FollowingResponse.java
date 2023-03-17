@@ -44,6 +44,11 @@ public class FollowingResponse extends PagedResponse {
     }
 
     @Override
+    public List getItems() {
+        return getFollowees();
+    }
+
+    @Override
     public boolean equals(Object param) {
         if (this == param) {
             return true;
@@ -65,8 +70,5 @@ public class FollowingResponse extends PagedResponse {
         return Objects.hash(followees);
     }
 
-    @Override
-    public List getItems() {
-        return getFollowees();
-    }
+
 }

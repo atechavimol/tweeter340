@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
@@ -109,5 +111,34 @@ public class FollowDAO {
      */
     FakeData getFakeData() {
         return FakeData.getInstance();
+    }
+
+    public FollowerResponse getFollowers(FollowerRequest request) {
+        // TODO: Generates dummy data. Replace with a real implementation.
+        assert request.getLimit() > 0;
+        assert request.getTargetUserAlias() != null;
+
+        List<User> allFollowers = getDummyFollowers();
+        List<User> responseFollowers = new ArrayList<>(request.getLimit());
+
+        boolean hasMorePages = false;
+
+        if(request.getLimit() > 0) {
+            if (allFollowers != null) {
+                int followeesIndex = getFolloweesStartingIndex(request.getLastFollowerAlias(), allFollowers);
+
+                for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
+                    responseFollowers.add(allFollowers.get(followeesIndex));
+                }
+
+                hasMorePages = followeesIndex < allFollowers.size();
+            }
+        }
+
+        return new FollowerResponse(responseFollowers, hasMorePages);
+    }
+
+    List<User> getDummyFollowers() {
+        return getFakeData().getFakeUsers();
     }
 }
