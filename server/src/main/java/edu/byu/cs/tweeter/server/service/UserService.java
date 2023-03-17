@@ -2,9 +2,11 @@ package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
@@ -45,6 +47,19 @@ public class UserService {
         return new LogoutResponse(true);
     }
 
+    public GetUserResponse getUser(GetUserRequest request) {
+        if(request.getAlias() == null) {
+            throw new RuntimeException("[Bad Request] Request must have alias");
+        }
+
+        User user = getFakeData().findUserByAlias(request.getAlias());
+
+        if(user == null) {
+            throw new RuntimeException("[Bad Request] User does not exist");
+        }
+        return new GetUserResponse(user);
+    }
+
     /**
      * Returns the dummy user to be returned by the login operation.
      * This is written as a separate method to allow mocking of the dummy user.
@@ -74,4 +89,6 @@ public class UserService {
     FakeData getFakeData() {
         return FakeData.getInstance();
     }
+
+
 }
