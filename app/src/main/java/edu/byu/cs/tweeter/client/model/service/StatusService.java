@@ -7,6 +7,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -19,7 +20,7 @@ public class StatusService{
         BackgroundTaskUtils.runTask(getFeedTask);
     }
 
-    public void getStory(User user, int pageSize, Status lastStatus, PagedPresenter.GetItemsObserver observer) {
+    public void getStory(User user, int pageSize, Status lastStatus, PagedNotificationObserver observer) {
         GetStoryTask getStoryTask = new GetStoryTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastStatus, new PagedNotificationHandler<Status>(observer) );
         BackgroundTaskUtils.runTask(getStoryTask);
@@ -28,6 +29,10 @@ public class StatusService{
         PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
                 newStatus, new SimpleNotificationHandler(postStatusObserver));
         BackgroundTaskUtils.runTask(statusTask);
+    }
+
+    public PagedNotificationHandler<Status> getPagedNotificationHandler(PagedPresenter.GetItemsObserver observer) {
+        return new PagedNotificationHandler<>(observer);
     }
 
 }
