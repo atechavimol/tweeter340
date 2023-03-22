@@ -16,12 +16,41 @@ import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
+import edu.byu.cs.tweeter.server.dao.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.Factory;
+import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.UserDAO;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
-public class FollowService {
+public class FollowService extends Service{
+    private AuthtokenDAO authtokenDAO;
+    private FeedDAO feedDAO;
+    private FollowsDAO followsDAO;
+    private StoryDAO storyDAO;
+    private UserDAO userDAO;
+
+    public FollowService() {
+        super();
+        initDAOs();
+    }
+
+    public FollowService(Factory factory){
+        super(factory);
+        initDAOs();
+    }
+
+    private void initDAOs() {
+        this.authtokenDAO = factory.getAuthtokenDAO();
+        this.feedDAO = factory.getFeedDAO();
+        this.followsDAO = factory.getFollowsDAO();
+        this.storyDAO = factory.getStoryDAO();
+        this.userDAO = factory.getUserDAO();
+    }
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in

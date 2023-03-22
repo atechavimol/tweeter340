@@ -36,7 +36,7 @@ public class GetUserTask extends AuthenticatedTask {
         GetUserResponse response = getServerFacade().getUser(request, "/getuser");
 
         if(response.isSuccess()) {
-            user = getUser();
+            user = response.getUser();
             sendSuccessMessage();
         } else {
             sendFailedMessage(response.getMessage());
@@ -47,8 +47,5 @@ public class GetUserTask extends AuthenticatedTask {
     protected void loadSuccessBundle(Bundle msgBundle) {
         msgBundle.putSerializable(USER_KEY, user);
     }
-
-    private User getUser() {
-        return getFakeData().findUserByAlias(alias);
-    }
+    
 }
