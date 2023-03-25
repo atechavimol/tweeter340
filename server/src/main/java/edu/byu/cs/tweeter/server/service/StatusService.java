@@ -10,7 +10,6 @@ import edu.byu.cs.tweeter.server.dao.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.Factory;
 import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.FollowsDAO;
-import edu.byu.cs.tweeter.server.dao.StatusDAO;
 import edu.byu.cs.tweeter.server.dao.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
 
@@ -45,7 +44,7 @@ public class StatusService extends Service{
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
-        return getStatusDAO().getStory(request);
+        return storyDAO.getStory(request);
     }
 
     public FeedResponse getFeed(FeedRequest request) {
@@ -54,19 +53,15 @@ public class StatusService extends Service{
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
-        return getStatusDAO().getFeed(request);
+        return feedDAO.getFeed(request);
     }
 
-    StatusDAO getStatusDAO(){
-        return new StatusDAO();
-    }
 
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         if(request.getStatus() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a status");
         }
-
-        return new PostStatusResponse();
+        return storyDAO.postStatus(request);
     }
 }

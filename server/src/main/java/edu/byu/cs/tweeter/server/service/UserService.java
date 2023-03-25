@@ -50,10 +50,8 @@ public class UserService extends Service{
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
-        return new LoginResponse(user, authToken);
+        return userDAO.login(request);
+
     }
 
     public RegisterResponse register(RegisterRequest request) {
@@ -62,62 +60,20 @@ public class UserService extends Service{
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[Bad Request] Missing a password");
         }
-
-        // TODO: Generates dummy data. Replace with a real implementation.
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
-        return new RegisterResponse(user, authToken);
+        return userDAO.register(request);
     }
 
     public LogoutResponse logout(LogoutRequest request) {
         if(request.getAuthToken() == null) {
             throw new RuntimeException("[Bad Request] Missing authtoken");
         }
-        return new LogoutResponse(true);
+        return userDAO.logout(request);
     }
 
     public GetUserResponse getUser(GetUserRequest request) {
         if(request.getAlias() == null) {
             throw new RuntimeException("[Bad Request] Request must have alias");
         }
-
-        User user = getFakeData().findUserByAlias(request.getAlias());
-
-        if(user == null) {
-            throw new RuntimeException("[Bad Request] User does not exist");
-        }
-        return new GetUserResponse(user);
+        return userDAO.getUser(request);
     }
-
-    /**
-     * Returns the dummy user to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy user.
-     *
-     * @return a dummy user.
-     */
-    User getDummyUser() {
-        return getFakeData().getFirstUser();
-    }
-
-    /**
-     * Returns the dummy auth token to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy auth token.
-     *
-     * @return a dummy auth token.
-     */
-    AuthToken getDummyAuthToken() {
-        return getFakeData().getAuthToken();
-    }
-
-    /**
-     * Returns the {@link FakeData} object used to generate dummy users and auth tokens.
-     * This is written as a separate method to allow mocking of the {@link FakeData}.
-     *
-     * @return a {@link FakeData} instance.
-     */
-    FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
-
-
 }
