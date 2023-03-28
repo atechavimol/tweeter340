@@ -60,7 +60,15 @@ public class UserService extends Service{
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[Bad Request] Missing a password");
         }
-        return userDAO.register(request);
+
+        User user = userDAO.register(request);
+
+        if(user == null){
+            return new RegisterResponse("Alias already taken");
+        }
+
+        AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
+        return new RegisterResponse(user, authToken);
     }
 
     public LogoutResponse logout(LogoutRequest request) {
@@ -74,6 +82,8 @@ public class UserService extends Service{
         if(request.getAlias() == null) {
             throw new RuntimeException("[Bad Request] Request must have alias");
         }
-        return userDAO.getUser(request);
+
+        User user = userDAO.getUser(request.getAlias());
+        return new GetUserResponse(user);
     }
 }

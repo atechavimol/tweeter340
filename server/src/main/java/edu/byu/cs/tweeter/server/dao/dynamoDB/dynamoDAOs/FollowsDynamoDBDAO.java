@@ -1,7 +1,9 @@
 package edu.byu.cs.tweeter.server.dao.dynamoDB.dynamoDAOs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import edu.byu.cs.tweeter.model.domain.User;
@@ -16,72 +18,173 @@ import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowersCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.server.dao.FollowsDAO;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.DataPage;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Follows;
 import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.util.Pair;
+import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 public class FollowsDynamoDBDAO implements FollowsDAO {
+    private static final String TableName = "Follows";
+    public static final String IndexName = "followeeAlias-followerAlias-index";
+
+    private static final String FollowerAttr = "followerAlias";
+    private static final String FolloweeAttr = "followeeAlias";
+
+    private static DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
+            .region(Region.US_WEST_2)
+            .build();
+
+    private static DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
+            .dynamoDbClient(dynamoDbClient)
+            .build();
+
+    private static boolean isNonEmptyString(String value) {
+        return (value != null && value.length() > 0);
+    }
+
     @Override
-    public FollowingResponse getFollowees(FollowingRequest request) {
-        assert request.getLimit() > 0;
-        assert request.getFollowerAlias() != null;
+    public Pair<List<Follows>, Boolean> getFollowees(FollowingRequest request) {
 
-        List<User> allFollowees = getDummyFollowees();
-        List<User> responseFollowees = new ArrayList<>(request.getLimit());
+        DataPage<Follows> page = getPageOfFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
+        List<Follows> followsList = page.getValues();
+        boolean hasMorePages = page.isHasMorePages();
 
-        boolean hasMorePages = false;
 
-        if(request.getLimit() > 0) {
-            if (allFollowees != null) {
-                int followeesIndex = getFolloweesStartingIndex(request.getLastFolloweeAlias(), allFollowees);
+        return new Pair<>(followsList, hasMorePages);
+        //return new FollowingResponse(convertFollowsToFolloweeUsers(followsList), hasMorePages);
+    }
 
-                for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
-                    responseFollowees.add(allFollowees.get(followeesIndex));
-                }
+    public DataPage<Follows> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias ) {
+        DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
+        Key key = Key.builder()
+                .partitionValue(targetUserAlias)
+                .build();
 
-                hasMorePages = followeesIndex < allFollowees.size();
-            }
+        QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.keyEqualTo(key))
+                .limit(pageSize);
+
+        if(isNonEmptyString(lastUserAlias)) {
+            // Build up the Exclusive Start Key (telling DynamoDB where you left off reading items)
+            Map<String, AttributeValue> startKey = new HashMap<>();
+            startKey.put(FollowerAttr, AttributeValue.builder().s(targetUserAlias).build());
+            startKey.put(FolloweeAttr, AttributeValue.builder().s(lastUserAlias).build());
+
+            requestBuilder.exclusiveStartKey(startKey);
         }
 
-        return new FollowingResponse(responseFollowees, hasMorePages);
+        QueryEnhancedRequest request = requestBuilder.build();
+
+        DataPage<Follows> result = new DataPage<Follows>();
+
+        PageIterable<Follows> pages = table.query(request);
+        pages.stream()
+                .limit(1)
+                .forEach((Page<Follows> page) -> {
+                    result.setHasMorePages(page.lastEvaluatedKey() != null);
+                    page.items().forEach(visit -> result.getValues().add(visit));
+                });
+
+
+        return result;
     }
 
+
     @Override
-    public FollowerResponse getFollowers(FollowerRequest request) {
-        assert request.getLimit() > 0;
-        assert request.getTargetUserAlias() != null;
+    public Pair<List<Follows>, Boolean> getFollowers(FollowerRequest request) {
+        DataPage<Follows> page = getPageOfFollowers(request.getTargetUserAlias(), request.getLimit(), request.getLastFollowerAlias());
+        List<Follows> followsList = page.getValues();
+        boolean hasMorePages = page.isHasMorePages();
 
-        List<User> allFollowers = getDummyFollowers();
-        List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
-        boolean hasMorePages = false;
+        return new Pair<>(followsList, hasMorePages);
+    }
 
-        if(request.getLimit() > 0) {
-            if (allFollowers != null) {
-                int followeesIndex = getFolloweesStartingIndex(request.getLastFollowerAlias(), allFollowers);
+    private DataPage<Follows> getPageOfFollowers(String targetUserAlias, int limit, String lastFollowerAlias) {
+        DynamoDbIndex<Follows> index = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class)).index(IndexName);
+        Key key = Key.builder()
+                .partitionValue(targetUserAlias)
+                .build();
 
-                for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
-                    responseFollowers.add(allFollowers.get(followeesIndex));
-                }
+        QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.keyEqualTo(key))
+                .limit(limit);
 
-                hasMorePages = followeesIndex < allFollowers.size();
-            }
+        if(isNonEmptyString(lastFollowerAlias)) {
+            Map<String, AttributeValue> startKey = new HashMap<>();
+            startKey.put(FolloweeAttr, AttributeValue.builder().s(targetUserAlias).build());
+            startKey.put(FollowerAttr, AttributeValue.builder().s(lastFollowerAlias).build());
+
+            requestBuilder.exclusiveStartKey(startKey);
         }
 
-        return new FollowerResponse(responseFollowers, hasMorePages);
+        QueryEnhancedRequest request = requestBuilder.build();
+
+        DataPage<Follows> result = new DataPage<Follows>();
+
+        SdkIterable<Page<Follows>> sdkIterable = index.query(request);
+        PageIterable<Follows> pages = PageIterable.create(sdkIterable);
+        pages.stream()
+                .limit(1)
+                .forEach((Page<Follows> page) -> {
+                    result.setHasMorePages(page.lastEvaluatedKey() != null);
+                    page.items().forEach(follows -> result.getValues().add(follows));
+                });
+
+        return result;
     }
 
     @Override
-    public IsFollowerResponse isFollower(IsFollowerRequest request) {
-        Boolean isFollower = new Random().nextInt() > 0;
+    public Boolean isFollower(String followerAlias, String followeeAlias) {
+       // Boolean isFollower = new Random().nextInt() > 0;
 
-        return new IsFollowerResponse(isFollower);
+        DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
+        Key key = Key.builder()
+                .partitionValue(followerAlias).sortValue(followeeAlias)
+                .build();
+
+        Follows follows = table.getItem(key);
+
+        return follows != null ? true:false;
     }
 
     @Override
-    public FollowResponse follow(FollowRequest request) {
+    public FollowResponse follow(String followerAlias, String followeeAlias) {
+        DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
+        Key key = Key.builder()
+                .partitionValue(followerAlias).sortValue(followeeAlias)
+                .build();
+
+        Follows follows = table.getItem(key);
+        if(follows != null) {
+            follows.setFollowerAlias(followerAlias);
+            follows.setFolloweeAlias(followeeAlias);
+            table.updateItem(follows);
+
+        } else {
+            Follows newFollows = new Follows();
+            newFollows.setFollowerAlias(followerAlias);
+            newFollows.setFolloweeAlias(followeeAlias);
+
+            table.putItem(newFollows);
+        }
+
         return new FollowResponse();
     }
 
@@ -91,13 +194,15 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
     }
 
     @Override
-    public FollowersCountResponse getFollowersCount(FollowersCountRequest request) {
-        return new FollowersCountResponse(201);
+    public int getFollowersCount(String followeeAlias) {
+        DataPage<Follows> followsDataPage = getPageOfFollowers(followeeAlias, Integer.MAX_VALUE, null);
+        return followsDataPage.getValues().size();
     }
 
     @Override
-    public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
-        return new FollowingCountResponse(203);
+    public int getFollowingCount(String followerAlias) {
+        DataPage<Follows> followsDataPage = getPageOfFollowees(followerAlias, Integer.MAX_VALUE, null);
+        return followsDataPage.getValues().size();
     }
 
     /**

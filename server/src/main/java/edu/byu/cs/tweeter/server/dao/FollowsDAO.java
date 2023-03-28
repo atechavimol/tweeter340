@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.util.List;
+
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowersCountRequest;
@@ -14,19 +16,21 @@ import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Follows;
+import edu.byu.cs.tweeter.util.Pair;
 
 public interface FollowsDAO {
-    FollowingResponse getFollowees(FollowingRequest request);
+    Pair<List<Follows>, Boolean> getFollowees(FollowingRequest request);
 
-    FollowerResponse getFollowers(FollowerRequest request);
+    Pair<List<Follows>, Boolean> getFollowers(FollowerRequest request);
 
-    IsFollowerResponse isFollower(IsFollowerRequest request);
+    Boolean isFollower(String followerAlias, String followeeAlias);
 
-    FollowResponse follow(FollowRequest request);
+    FollowResponse follow(String followerAlias, String followeeAlias);
 
     UnfollowResponse unfollow(UnfollowRequest request);
 
-    FollowersCountResponse getFollowersCount(FollowersCountRequest request);
+    int getFollowersCount(String followeeAlias);
 
-    FollowingCountResponse getFollowingCount(FollowingCountRequest request);
+    int getFollowingCount(String followerAlias);
 }

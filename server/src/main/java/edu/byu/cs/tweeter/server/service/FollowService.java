@@ -1,7 +1,9 @@
 package edu.byu.cs.tweeter.server.service;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowersCountRequest;
@@ -22,6 +24,8 @@ import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.FollowsDAO;
 import edu.byu.cs.tweeter.server.dao.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Follows;
+import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Contains the business logic for getting the users a user is following.
@@ -58,7 +62,18 @@ public class FollowService extends Service{
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
-        return followsDAO.getFollowees(request);
+
+        Pair<List<Follows>, Boolean> result = followsDAO.getFollowees(request);
+
+        // parse result into list of users
+        List<User> users = new ArrayList<>();
+        for(Follows follow: result.getFirst()) {
+            User user = userDAO.getUser(follow.getFolloweeAlias());
+            users.add(user);
+
+        }
+        // create response
+        return new FollowingResponse(users, result.getSecond());
     }
 
     public FollowerResponse getFollowers(FollowerRequest request) {
@@ -67,7 +82,15 @@ public class FollowService extends Service{
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
-        return followsDAO.getFollowers(request);
+        Pair<List<Follows>, Boolean> result = followsDAO.getFollowers(request);
+
+        List<User> users = new ArrayList<>();
+        for(Follows follow: result.getFirst()) {
+            User user = userDAO.getUser(follow.getFollowerAlias());
+            users.add(user);
+
+        }
+        return new FollowerResponse(users, result.getSecond());
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
@@ -77,14 +100,19 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
 
-        return  followsDAO.isFollower(request);
+        Boolean isFollower = followsDAO.isFollower(request.getFollowerAlias(), request.getFolloweeAlias());
+
+        return new IsFollowerResponse(isFollower);
     }
 
     public FollowResponse follow(FollowRequest request) {
         if(request.getFollowee() == null){
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
-        return followsDAO.follow(request);
+
+        // TODO change this!!!
+        return followsDAO.follow(null, null);
+
     }
 
 
@@ -99,13 +127,15 @@ public class FollowService extends Service{
         if(request.getTargetUserAlias() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a target user alias");
         }
-        return followsDAO.getFollowersCount(request);
+        int followersCount = followsDAO.getFollowersCount(request.getTargetUserAlias());
+        return new FollowersCountResponse(followersCount);
     }
 
     public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
         if(request.getTargetUserAlias() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a target user alias");
         }
-        return followsDAO.getFollowingCount(request);
+        int followingCount = followsDAO.getFollowingCount(request.getTargetUserAlias());
+        return new FollowingCountResponse(followingCount);
     }
 }
