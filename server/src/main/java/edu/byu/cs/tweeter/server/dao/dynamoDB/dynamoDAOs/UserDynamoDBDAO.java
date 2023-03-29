@@ -38,17 +38,26 @@ public class UserDynamoDBDAO implements UserDAO {
     }
 
     @Override
-    public LoginResponse login(LoginRequest request) {
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
-        return new LoginResponse(user, authToken);
+    public User login(LoginRequest request) {
+        DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
+        Key key = Key.builder()
+                .partitionValue(request.getUsername())
+                .build();
+
+        UserTable user = table.getItem(key);
+        if(user == null) {
+            return null;
+        }
+
+        if(!user.getPassword().equals(request.getPassword())) {
+            return null;
+        }
+
+        return new User(user.getFirstName(), user.getLastName(), user.getAlias(), user.getImageUrl());
     }
 
     @Override
     public User register(RegisterRequest request) {
-//        User user = getDummyUser();
-//        AuthToken authToken = getDummyAuthToken();
-
         DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
         Key key = Key.builder()
                 .partitionValue(request.getUsername())
@@ -65,6 +74,8 @@ public class UserDynamoDBDAO implements UserDAO {
             user.setAlias(request.getUsername());
             user.setImageUrl(request.getImage());
             user.setPassword(request.getPassword());
+            user.setFollowersCount(0);
+            user.setFollowingCount(0);
             table.putItem(user);
         }
 
@@ -73,6 +84,7 @@ public class UserDynamoDBDAO implements UserDAO {
 
     @Override
     public LogoutResponse logout(LogoutRequest request) {
+        //TODO THIS feels wrong
         return new LogoutResponse(true);
     }
 
@@ -89,13 +101,63 @@ public class UserDynamoDBDAO implements UserDAO {
         return foundUser;
     }
 
-    User getDummyUser() {
-        return getFakeData().getFirstUser();
+    @Override
+    public void updateFollowingCount(int i, String curUserAlias) {
+        DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
+        Key key = Key.builder()
+                .partitionValue(curUserAlias)
+                .build();
+
+        UserTable user = table.getItem(key);
+        if(user != null) {
+            user.setFollowingCount(user.getFollowingCount() + i);
+            table.updateItem(user);
+        }
+
+        // idk what to do if the user is null
     }
-    AuthToken getDummyAuthToken() {
-        return getFakeData().getAuthToken();
+
+    @Override
+    public void updateFollowersCount(int i, String alias) {
+        DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
+        Key key = Key.builder()
+                .partitionValue(alias)
+                .build();
+
+        UserTable user = table.getItem(key);
+        if(user != null) {
+            user.setFollowersCount(user.getFollowersCount() + i);
+            table.updateItem(user);
+        }
     }
-    FakeData getFakeData() {
-        return FakeData.getInstance();
+
+    @Override
+    public int getFollowersCount(String userAlias) {
+        DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
+        Key key = Key.builder()
+                .partitionValue(userAlias)
+                .build();
+
+        UserTable user = table.getItem(key);
+
+        if(user == null) {
+            throw new NullPointerException();
+        }
+        return user.getFollowersCount();
     }
+
+    @Override
+    public int getFollowingCount(String userAlias) {
+        DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
+        Key key = Key.builder()
+                .partitionValue(userAlias)
+                .build();
+
+        UserTable user = table.getItem(key);
+        if(user == null) {
+            throw new NullPointerException();
+        }
+        return user.getFollowingCount();
+    }
+
 }

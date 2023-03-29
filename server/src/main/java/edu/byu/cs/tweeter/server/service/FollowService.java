@@ -111,7 +111,23 @@ public class FollowService extends Service{
         }
 
         // TODO change this!!!
-        return followsDAO.follow(null, null);
+        String curUserAlias = authtokenDAO.validateToken(request.getAuthToken());
+
+        if(curUserAlias == null) {
+            return new FollowResponse("Authtoken is invalid");
+        }
+
+        Boolean success =  followsDAO.follow(curUserAlias, request.getFollowee().getAlias());
+
+        if(success){
+
+            userDAO.updateFollowingCount(1, curUserAlias);
+            userDAO.updateFollowersCount(1, request.getFollowee().getAlias());
+
+            return new FollowResponse();
+        } else {
+            return new FollowResponse("Could not process follow request");
+        }
 
     }
 
@@ -120,22 +136,51 @@ public class FollowService extends Service{
         if(request.getFollowee() == null){
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
-        return followsDAO.unfollow(request);
+
+        String curUserAlias = authtokenDAO.validateToken((request.getAuthToken()));
+
+        if(curUserAlias == null) {
+            return new UnfollowResponse("Authtoken is invalid");
+        }
+
+        Boolean success = followsDAO.unfollow(curUserAlias, request.getFollowee().getAlias());
+
+        if(success) {
+            userDAO.updateFollowingCount(-1, curUserAlias);
+            userDAO.updateFollowersCount(-1, request.getFollowee().getAlias());
+            return new UnfollowResponse();
+        } else {
+            return new UnfollowResponse("Could not process unfollow request");
+        }
     }
 
     public FollowersCountResponse getFollowersCount(FollowersCountRequest request) {
         if(request.getTargetUserAlias() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a target user alias");
         }
-        int followersCount = followsDAO.getFollowersCount(request.getTargetUserAlias());
-        return new FollowersCountResponse(followersCount);
+
+        try {
+            int followersCount = userDAO.getFollowersCount(request.getTargetUserAlias());
+            return new FollowersCountResponse(followersCount);
+
+        } catch (Exception e) {
+            return new FollowersCountResponse("Couldn't get follower count");
+        }
+
     }
 
     public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
         if(request.getTargetUserAlias() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a target user alias");
         }
-        int followingCount = followsDAO.getFollowingCount(request.getTargetUserAlias());
-        return new FollowingCountResponse(followingCount);
+
+        try {
+            int followingCount = userDAO.getFollowingCount(request.getTargetUserAlias());
+            return new FollowingCountResponse(followingCount);
+        } catch (Exception e){
+            return new FollowingCountResponse("Couldn't get follower count");
+        }
+
+
     }
 }

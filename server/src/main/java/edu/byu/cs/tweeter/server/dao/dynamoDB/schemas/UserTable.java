@@ -10,6 +10,8 @@ public class UserTable {
     private String alias;
     private String imageUrl;
     private String password;
+    private int followingCount;
+    private int followersCount;
 
     public String getFirstName() {
         return firstName;
@@ -50,5 +52,21 @@ public class UserTable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getFollowingCount() {
+        return followingCount;
+    }
+
+    public void setFollowingCount(int followingCount) {
+        this.followingCount = followingCount;
+    }
+
+    public int getFollowersCount() {
+        return followersCount;
+    }
+
+    public void setFollowersCount(int followersCount) {
+        this.followersCount = followersCount;
     }
 }

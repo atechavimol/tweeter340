@@ -5,17 +5,16 @@ import java.util.UUID;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.server.dao.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.AuthtokenTable;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.UserTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
     private static final String TableName = "Authtoken";
-    public static final String IndexName = "followeeAlias-followerAlias-index";
-
-    private static final String AuthtokenAttr = "authtoken";
 
 
     private static DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
@@ -47,4 +46,44 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
 
         return new AuthToken(newAuthtoken.getAuthtoken(), newAuthtoken.getTimeout());
     }
+
+    @Override
+    public void expireToken(AuthToken authToken) {
+        DynamoDbTable<AuthtokenTable> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenTable.class));
+
+        Key key = Key.builder()
+                .partitionValue(authToken.getToken()).sortValue(authToken.getDatetime())
+                .build();
+
+        table.deleteItem(key);
+
+    }
+
+    @Override
+    public String validateToken(AuthToken authToken) {
+        DynamoDbTable<AuthtokenTable> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenTable.class));
+
+        Key key = Key.builder()
+                .partitionValue(authToken.getToken()).sortValue(authToken.getDatetime())
+                .build();
+
+        AuthtokenTable foundAuthtoken = table.getItem(key);
+
+        if(foundAuthtoken == null){
+            return null;
+        } else if(!isValid(foundAuthtoken)) {
+            //expireToken(authToken);
+            return null;
+        } else {
+            return foundAuthtoken.getUserAlias();
+        }
+
+    }
+
+    private Boolean isValid(AuthtokenTable authtoken){
+        // TODO validate authtoken timout
+        return true;
+    }
+
+
 }

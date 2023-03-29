@@ -11,11 +11,19 @@ import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 
 public interface UserDAO {
-    LoginResponse login(LoginRequest request);
+    User login(LoginRequest request);
 
     User register(RegisterRequest request);
 
     LogoutResponse logout(LogoutRequest request);
 
     User getUser(String userAlias);
+
+    void updateFollowingCount(int i, String curUserAlias);
+
+    void updateFollowersCount(int i, String alias);
+
+    int getFollowersCount(String userAlias);
+
+    int getFollowingCount(String userAlias);
 }

@@ -161,11 +161,11 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
 
         Follows follows = table.getItem(key);
 
-        return follows != null ? true:false;
+        return follows != null;
     }
 
     @Override
-    public FollowResponse follow(String followerAlias, String followeeAlias) {
+    public Boolean follow(String followerAlias, String followeeAlias) {
         DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
         Key key = Key.builder()
                 .partitionValue(followerAlias).sortValue(followeeAlias)
@@ -185,24 +185,18 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
             table.putItem(newFollows);
         }
 
-        return new FollowResponse();
+        return true;
     }
 
     @Override
-    public UnfollowResponse unfollow(UnfollowRequest request) {
-        return new UnfollowResponse();
-    }
+    public Boolean unfollow(String followerAlias, String followeeAlias) {
+        DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
+        Key key = Key.builder()
+                .partitionValue(followerAlias).sortValue(followeeAlias)
+                .build();
 
-    @Override
-    public int getFollowersCount(String followeeAlias) {
-        DataPage<Follows> followsDataPage = getPageOfFollowers(followeeAlias, Integer.MAX_VALUE, null);
-        return followsDataPage.getValues().size();
-    }
-
-    @Override
-    public int getFollowingCount(String followerAlias) {
-        DataPage<Follows> followsDataPage = getPageOfFollowees(followerAlias, Integer.MAX_VALUE, null);
-        return followsDataPage.getValues().size();
+        table.deleteItem(key);
+        return true;
     }
 
     /**
@@ -216,7 +210,6 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
      * @return the index of the first followee to be returned.
      */
     private int getFolloweesStartingIndex(String lastFolloweeAlias, List<User> allFollowees) {
-
         int followeesIndex = 0;
 
         if(lastFolloweeAlias != null) {
@@ -233,16 +226,6 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
         }
 
         return followeesIndex;
-    }
-
-    List<User> getDummyFollowees() {
-        return getFakeData().getFakeUsers();
-    }
-    FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
-    List<User> getDummyFollowers() {
-        return getFakeData().getFakeUsers();
     }
 
 }

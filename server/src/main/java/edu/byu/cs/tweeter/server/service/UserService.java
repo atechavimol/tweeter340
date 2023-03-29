@@ -50,8 +50,14 @@ public class UserService extends Service{
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        return userDAO.login(request);
+        User user = userDAO.login(request);
 
+        if(user == null) {
+            return new LoginResponse("Invalid credentials");
+        }
+
+        AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
+        return new LoginResponse(user, authToken);
     }
 
     public RegisterResponse register(RegisterRequest request) {
@@ -75,6 +81,8 @@ public class UserService extends Service{
         if(request.getAuthToken() == null) {
             throw new RuntimeException("[Bad Request] Missing authtoken");
         }
+
+        authtokenDAO.expireToken(request.getAuthToken());
         return userDAO.logout(request);
     }
 
