@@ -22,7 +22,7 @@ import edu.byu.cs.tweeter.util.Pair;
 public interface FollowsDAO {
     Pair<List<Follows>, Boolean> getFollowees(FollowingRequest request);
 
-    Pair<List<Follows>, Boolean> getFollowers(FollowerRequest request);
+    Pair<List<Follows>, Boolean> getFollowers(String targetUserAlias, int limit, String lastFollowerAlias);
 
     Boolean isFollower(String followerAlias, String followeeAlias);
 

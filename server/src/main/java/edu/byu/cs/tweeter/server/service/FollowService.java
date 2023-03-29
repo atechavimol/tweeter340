@@ -85,7 +85,8 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
         }
 
-        Pair<List<Follows>, Boolean> result = followsDAO.getFollowers(request);
+        Pair<List<Follows>, Boolean> result = followsDAO.getFollowers(request.getTargetUserAlias(), request.getLimit(),
+                                                                        request.getLastFollowerAlias());
 
         List<User> users = new ArrayList<>();
         for(Follows follow: result.getFirst()) {

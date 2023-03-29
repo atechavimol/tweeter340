@@ -1,20 +1,21 @@
 package edu.byu.cs.tweeter.model.net.request;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
 
 public class StoryRequest {
     private AuthToken authToken;
     private String targetUserAlias;
     private int limit;
-    private Integer lastStatusHash;
+    private Status lastStatus;
 
     private StoryRequest(){}
 
-    public StoryRequest(AuthToken authToken, String targetUserAlias, int limit, Integer lastStatusHash) {
+    public StoryRequest(AuthToken authToken, String targetUserAlias, int limit, Status lastStatus) {
         this.authToken = authToken;
         this.targetUserAlias = targetUserAlias;
         this.limit = limit;
-        this.lastStatusHash = lastStatusHash;
+        this.lastStatus = lastStatus;
     }
 
     public AuthToken getAuthToken() {
@@ -41,11 +42,11 @@ public class StoryRequest {
         this.limit = limit;
     }
 
-    public int getLastStatusHash() {
-        return lastStatusHash;
+    public Status getLastStatus() {
+        return lastStatus;
     }
 
-    public void setLastStatusHash(int lastStatusHash) {
-        this.lastStatusHash = lastStatusHash;
+    public void setLastStatus(Status lastStatus) {
+        this.lastStatus = lastStatus;
     }
 }

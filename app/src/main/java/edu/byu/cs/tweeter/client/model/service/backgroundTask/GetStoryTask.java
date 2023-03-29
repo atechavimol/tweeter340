@@ -25,9 +25,9 @@ public class GetStoryTask extends PagedStatusTask {
     @Override
     protected PagedResponse processRequest() throws IOException, TweeterRemoteException {
         String targetUserAlias = targetUser == null ? null : targetUser.getAlias();
-        Integer lastStatusHash = lastItem == null ? null : lastItem.hashCode();
+        Status lastStatus = lastItem == null ? null : lastItem;
 
-        StoryRequest request = new StoryRequest(authToken, targetUserAlias, limit, lastStatusHash);
+        StoryRequest request = new StoryRequest(authToken, targetUserAlias, limit, lastStatus);
         StoryResponse response = getServerFacade().getStory(request, "/story");
 
         return response;

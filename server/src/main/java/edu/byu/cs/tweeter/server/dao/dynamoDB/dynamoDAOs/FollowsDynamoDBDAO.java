@@ -103,8 +103,8 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
 
 
     @Override
-    public Pair<List<Follows>, Boolean> getFollowers(FollowerRequest request) {
-        DataPage<Follows> page = getPageOfFollowers(request.getTargetUserAlias(), request.getLimit(), request.getLastFollowerAlias());
+    public Pair<List<Follows>, Boolean> getFollowers(String targetUserAlias, int limit, String lastFollowerAlias) {
+        DataPage<Follows> page = getPageOfFollowers(targetUserAlias, limit, lastFollowerAlias);
 
         return new Pair<>(page.getValues(), page.isHasMorePages());
     }

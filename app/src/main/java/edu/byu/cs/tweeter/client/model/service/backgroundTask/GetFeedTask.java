@@ -25,10 +25,10 @@ public class GetFeedTask extends PagedStatusTask {
     @Override
     protected PagedResponse processRequest() throws IOException, TweeterRemoteException {
         String targetUserAlias = targetUser == null ? null : targetUser.getAlias();
-        Integer lastStatusHash = lastItem == null ? null : lastItem.hashCode();
+        Status lastStatus = lastItem == null ? null : lastItem;
 
 
-        FeedRequest request = new FeedRequest(authToken, targetUserAlias, limit, lastStatusHash);
+        FeedRequest request = new FeedRequest(authToken, targetUserAlias, limit, lastStatus);
         FeedResponse response = getServerFacade().getFeed(request, "/feed");
         return response;
     }
