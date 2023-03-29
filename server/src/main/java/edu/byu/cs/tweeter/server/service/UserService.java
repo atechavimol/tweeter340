@@ -1,5 +1,8 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
@@ -50,7 +53,7 @@ public class UserService extends Service{
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        User user = userDAO.login(request);
+        User user = userDAO.login(request.getUsername(), hashPassword(request.getPassword()));
 
         if(user == null) {
             return new LoginResponse("Invalid credentials");
@@ -67,7 +70,8 @@ public class UserService extends Service{
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        User user = userDAO.register(request);
+        User user = userDAO.register(request.getFirstName(), request.getLastName(), request.getUsername(),
+                                        request.getImage(), hashPassword(request.getPassword()));
 
         if(user == null){
             return new RegisterResponse("Alias already taken");
@@ -93,5 +97,21 @@ public class UserService extends Service{
 
         User user = userDAO.getUser(request.getAlias());
         return new GetUserResponse(user);
+    }
+
+    private static String hashPassword(String passwordToHash) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(passwordToHash.getBytes());
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "FAILED TO HASH";
     }
 }

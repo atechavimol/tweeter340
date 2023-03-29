@@ -55,6 +55,7 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
                 .partitionValue(authToken.getToken()).sortValue(authToken.getDatetime())
                 .build();
 
+        //TODO check if the authtoken actually got deleted
         table.deleteItem(key);
 
     }
@@ -70,10 +71,10 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
         AuthtokenTable foundAuthtoken = table.getItem(key);
 
         if(foundAuthtoken == null){
-            return null;
+            throw new RuntimeException("[Bad Request] The session has expired. Logout and log back in to renew the session");
         } else if(!isValid(foundAuthtoken)) {
             //expireToken(authToken);
-            return null;
+            throw new RuntimeException("[Bad Request] The session has expired. Logout and log back in to renew the session");
         } else {
             return foundAuthtoken.getUserAlias();
         }

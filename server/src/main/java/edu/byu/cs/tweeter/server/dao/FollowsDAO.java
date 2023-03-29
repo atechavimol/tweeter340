@@ -26,8 +26,8 @@ public interface FollowsDAO {
 
     Boolean isFollower(String followerAlias, String followeeAlias);
 
-    Boolean follow(String followerAlias, String followeeAlias);
+    void follow(String followerAlias, String followeeAlias);
 
-    Boolean unfollow(String followerAlias, String followeeAlias);
+    void unfollow(String followerAlias, String followeeAlias);
 
 }

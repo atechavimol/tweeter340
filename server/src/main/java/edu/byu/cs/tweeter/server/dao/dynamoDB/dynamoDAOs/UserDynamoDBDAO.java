@@ -38,10 +38,10 @@ public class UserDynamoDBDAO implements UserDAO {
     }
 
     @Override
-    public User login(LoginRequest request) {
+    public User login(String username, String hashedPassword) {
         DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
         Key key = Key.builder()
-                .partitionValue(request.getUsername())
+                .partitionValue(username)
                 .build();
 
         UserTable user = table.getItem(key);
@@ -49,7 +49,7 @@ public class UserDynamoDBDAO implements UserDAO {
             return null;
         }
 
-        if(!user.getPassword().equals(request.getPassword())) {
+        if(!user.getPassword().equals(hashedPassword)) {
             return null;
         }
 
@@ -57,10 +57,10 @@ public class UserDynamoDBDAO implements UserDAO {
     }
 
     @Override
-    public User register(RegisterRequest request) {
+    public User register(String firstName, String lastName, String username, String image, String hashedPassword) {
         DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
         Key key = Key.builder()
-                .partitionValue(request.getUsername())
+                .partitionValue(username)
                 .build();
 
         UserTable user = table.getItem(key);
@@ -69,11 +69,11 @@ public class UserDynamoDBDAO implements UserDAO {
 
         } else {
             user = new UserTable();
-            user.setFirstName(request.getFirstName());
-            user.setLastName(request.getLastName());
-            user.setAlias(request.getUsername());
-            user.setImageUrl(request.getImage());
-            user.setPassword(request.getPassword());
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setAlias(username);
+            user.setImageUrl(image);
+            user.setPassword(hashedPassword);
             user.setFollowersCount(0);
             user.setFollowingCount(0);
             table.putItem(user);
@@ -109,12 +109,14 @@ public class UserDynamoDBDAO implements UserDAO {
                 .build();
 
         UserTable user = table.getItem(key);
-        if(user != null) {
-            user.setFollowingCount(user.getFollowingCount() + i);
-            table.updateItem(user);
+
+        if(user == null) {
+            throw new NullPointerException("[Bad Request] User does not exist");
         }
 
-        // idk what to do if the user is null
+        user.setFollowingCount(user.getFollowingCount() + i);
+        table.updateItem(user);
+
     }
 
     @Override
@@ -125,10 +127,14 @@ public class UserDynamoDBDAO implements UserDAO {
                 .build();
 
         UserTable user = table.getItem(key);
-        if(user != null) {
-            user.setFollowersCount(user.getFollowersCount() + i);
-            table.updateItem(user);
+
+        if(user == null){
+            throw new NullPointerException("[Bad Request] User does not exist");
         }
+
+        user.setFollowersCount(user.getFollowersCount() + i);
+        table.updateItem(user);
+
     }
 
     @Override
@@ -139,9 +145,8 @@ public class UserDynamoDBDAO implements UserDAO {
                 .build();
 
         UserTable user = table.getItem(key);
-
         if(user == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("[Bad Request] User does not exist");
         }
         return user.getFollowersCount();
     }
@@ -155,7 +160,7 @@ public class UserDynamoDBDAO implements UserDAO {
 
         UserTable user = table.getItem(key);
         if(user == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("[Bad Request] User does not exist");
         }
         return user.getFollowingCount();
     }

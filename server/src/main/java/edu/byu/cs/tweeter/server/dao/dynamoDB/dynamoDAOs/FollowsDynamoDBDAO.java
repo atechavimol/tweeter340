@@ -62,12 +62,8 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
     public Pair<List<Follows>, Boolean> getFollowees(FollowingRequest request) {
 
         DataPage<Follows> page = getPageOfFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
-        List<Follows> followsList = page.getValues();
-        boolean hasMorePages = page.isHasMorePages();
 
-
-        return new Pair<>(followsList, hasMorePages);
-        //return new FollowingResponse(convertFollowsToFolloweeUsers(followsList), hasMorePages);
+        return new Pair<>(page.getValues(), page.isHasMorePages());
     }
 
     public DataPage<Follows> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias ) {
@@ -109,11 +105,8 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
     @Override
     public Pair<List<Follows>, Boolean> getFollowers(FollowerRequest request) {
         DataPage<Follows> page = getPageOfFollowers(request.getTargetUserAlias(), request.getLimit(), request.getLastFollowerAlias());
-        List<Follows> followsList = page.getValues();
-        boolean hasMorePages = page.isHasMorePages();
 
-
-        return new Pair<>(followsList, hasMorePages);
+        return new Pair<>(page.getValues(), page.isHasMorePages());
     }
 
     private DataPage<Follows> getPageOfFollowers(String targetUserAlias, int limit, String lastFollowerAlias) {
@@ -152,8 +145,6 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
 
     @Override
     public Boolean isFollower(String followerAlias, String followeeAlias) {
-       // Boolean isFollower = new Random().nextInt() > 0;
-
         DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
         Key key = Key.builder()
                 .partitionValue(followerAlias).sortValue(followeeAlias)
@@ -165,38 +156,38 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
     }
 
     @Override
-    public Boolean follow(String followerAlias, String followeeAlias) {
+    public void follow(String followerAlias, String followeeAlias) {
         DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
         Key key = Key.builder()
                 .partitionValue(followerAlias).sortValue(followeeAlias)
                 .build();
 
         Follows follows = table.getItem(key);
+
         if(follows != null) {
-            follows.setFollowerAlias(followerAlias);
-            follows.setFolloweeAlias(followeeAlias);
-            table.updateItem(follows);
-
-        } else {
-            Follows newFollows = new Follows();
-            newFollows.setFollowerAlias(followerAlias);
-            newFollows.setFolloweeAlias(followeeAlias);
-
-            table.putItem(newFollows);
+            throw new RuntimeException("[Server Error] Follower/followee relationship already exists");
         }
 
-        return true;
+        Follows newFollows = new Follows();
+        newFollows.setFollowerAlias(followerAlias);
+        newFollows.setFolloweeAlias(followeeAlias);
+        table.putItem(newFollows);
+
     }
 
     @Override
-    public Boolean unfollow(String followerAlias, String followeeAlias) {
+    public void unfollow(String followerAlias, String followeeAlias) {
         DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
         Key key = Key.builder()
                 .partitionValue(followerAlias).sortValue(followeeAlias)
                 .build();
 
-        table.deleteItem(key);
-        return true;
+        Follows follows = table.deleteItem(key);
+
+        if(follows == null) {
+            throw new RuntimeException("[Server Error] Follower/Followee relationship does not exist");
+        }
+
     }
 
     /**

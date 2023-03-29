@@ -11,9 +11,7 @@ import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 
 public interface UserDAO {
-    User login(LoginRequest request);
-
-    User register(RegisterRequest request);
+    User register(String firstName, String lastName, String username, String image, String hashedPassword);
 
     LogoutResponse logout(LogoutRequest request);
 
@@ -26,4 +24,6 @@ public interface UserDAO {
     int getFollowersCount(String userAlias);
 
     int getFollowingCount(String userAlias);
+
+    User login(String username, String hashedPassword);
 }
