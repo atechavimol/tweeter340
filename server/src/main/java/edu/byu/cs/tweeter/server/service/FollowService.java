@@ -32,9 +32,9 @@ import edu.byu.cs.tweeter.util.Pair;
  */
 public class FollowService extends Service{
     private AuthtokenDAO authtokenDAO;
-    private FeedDAO feedDAO;
+    //private FeedDAO feedDAO;
     private FollowsDAO followsDAO;
-    private StoryDAO storyDAO;
+    //private StoryDAO storyDAO;
     private UserDAO userDAO;
 
     public FollowService() {
@@ -49,9 +49,9 @@ public class FollowService extends Service{
 
     private void initDAOs() {
         this.authtokenDAO = factory.getAuthtokenDAO();
-        this.feedDAO = factory.getFeedDAO();
+        //this.feedDAO = factory.getFeedDAO();
         this.followsDAO = factory.getFollowsDAO();
-        this.storyDAO = factory.getStoryDAO();
+        //this.storyDAO = factory.getStoryDAO();
         this.userDAO = factory.getUserDAO();
     }
 
@@ -65,15 +65,22 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
         }
 
-        Pair<List<Follows>, Boolean> result = followsDAO.getFollowees(request);
+        try {
+            authtokenDAO.validateToken(request.getAuthToken());
+            Pair<List<Follows>, Boolean> result = followsDAO.getFollowees(request);
 
-        List<User> users = new ArrayList<>();
-        for(Follows follow: result.getFirst()) {
-            User user = userDAO.getUser(follow.getFolloweeAlias());
-            users.add(user);
+            List<User> users = new ArrayList<>();
+            for(Follows follow: result.getFirst()) {
+                User user = userDAO.getUser(follow.getFolloweeAlias());
+                users.add(user);
+            }
+
+            return new FollowingResponse(users, result.getSecond());
+        } catch (Exception e) {
+            return new FollowingResponse(e.getMessage());
         }
 
-        return new FollowingResponse(users, result.getSecond());
+
     }
 
     public FollowerResponse getFollowers(FollowerRequest request) {
@@ -85,15 +92,21 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
         }
 
-        Pair<List<Follows>, Boolean> result = followsDAO.getFollowers(request.getTargetUserAlias(), request.getLimit(),
-                                                                        request.getLastFollowerAlias());
+        try {
+            authtokenDAO.validateToken(request.getAuthToken());
+            Pair<List<Follows>, Boolean> result = followsDAO.getFollowers(request.getTargetUserAlias(), request.getLimit(),
+                    request.getLastFollowerAlias());
 
-        List<User> users = new ArrayList<>();
-        for(Follows follow: result.getFirst()) {
-            User user = userDAO.getUser(follow.getFollowerAlias());
-            users.add(user);
+            List<User> users = new ArrayList<>();
+            for(Follows follow: result.getFirst()) {
+                User user = userDAO.getUser(follow.getFollowerAlias());
+                users.add(user);
+            }
+            return new FollowerResponse(users, result.getSecond());
+        } catch (Exception e) {
+            return new FollowerResponse(e.getMessage());
         }
-        return new FollowerResponse(users, result.getSecond());
+
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
@@ -103,9 +116,15 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
 
-        Boolean isFollower = followsDAO.isFollower(request.getFollowerAlias(), request.getFolloweeAlias());
+        try {
+            authtokenDAO.validateToken(request.getAuthToken());
+            Boolean isFollower = followsDAO.isFollower(request.getFollowerAlias(), request.getFolloweeAlias());
+            return new IsFollowerResponse(isFollower);
+        } catch (Exception e) {
+            return new IsFollowerResponse(e.getMessage());
+        }
 
-        return new IsFollowerResponse(isFollower);
+
     }
 
     public FollowResponse follow(FollowRequest request) {
@@ -113,13 +132,18 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
 
-        String curUserAlias = authtokenDAO.validateToken(request.getAuthToken());
+        try{
+            String curUserAlias = authtokenDAO.validateToken(request.getAuthToken());
 
-        followsDAO.follow(curUserAlias, request.getFollowee().getAlias());
-        userDAO.updateFollowingCount(1, curUserAlias);
-        userDAO.updateFollowersCount(1, request.getFollowee().getAlias());
+            followsDAO.follow(curUserAlias, request.getFollowee().getAlias());
+            userDAO.updateFollowingCount(1, curUserAlias);
+            userDAO.updateFollowersCount(1, request.getFollowee().getAlias());
+            return new FollowResponse();
 
-        return new FollowResponse();
+        } catch (Exception e){
+            return new FollowResponse(e.getMessage());
+        }
+
     }
 
 
@@ -128,13 +152,19 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
         }
 
-        String curUserAlias = authtokenDAO.validateToken((request.getAuthToken()));
+        try {
+            String curUserAlias = authtokenDAO.validateToken((request.getAuthToken()));
 
-        followsDAO.unfollow(curUserAlias, request.getFollowee().getAlias());
-        userDAO.updateFollowingCount(-1, curUserAlias);
-        userDAO.updateFollowersCount(-1, request.getFollowee().getAlias());
+            followsDAO.unfollow(curUserAlias, request.getFollowee().getAlias());
+            userDAO.updateFollowingCount(-1, curUserAlias);
+            userDAO.updateFollowersCount(-1, request.getFollowee().getAlias());
 
-        return new UnfollowResponse();
+            return new UnfollowResponse();
+        } catch (Exception e) {
+            return new UnfollowResponse(e.getMessage());
+        }
+
+
 
     }
 
@@ -143,8 +173,14 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have a target user alias");
         }
 
-        int followersCount = userDAO.getFollowersCount(request.getTargetUserAlias());
-        return new FollowersCountResponse(followersCount);
+        try {
+            authtokenDAO.validateToken(request.getAuthToken());
+            int followersCount = userDAO.getFollowersCount(request.getTargetUserAlias());
+            return new FollowersCountResponse(followersCount);
+        } catch (Exception e) {
+            return new FollowersCountResponse(e.getMessage());
+        }
+
     }
 
     public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
@@ -152,8 +188,13 @@ public class FollowService extends Service{
             throw new RuntimeException("[Bad Request] Request needs to have a target user alias");
         }
 
-        int followingCount = userDAO.getFollowingCount(request.getTargetUserAlias());
-        return new FollowingCountResponse(followingCount);
+        try {
+           authtokenDAO.validateToken(request.getAuthToken());
+            int followingCount = userDAO.getFollowingCount(request.getTargetUserAlias());
+            return new FollowingCountResponse(followingCount);
+        } catch (Exception e) {
+            return new FollowingCountResponse(e.getMessage());
+        }
 
     }
 }

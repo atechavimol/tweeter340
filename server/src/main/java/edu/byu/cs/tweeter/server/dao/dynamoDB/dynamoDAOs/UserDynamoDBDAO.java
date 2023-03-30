@@ -97,6 +97,10 @@ public class UserDynamoDBDAO implements UserDAO {
 
         UserTable user = table.getItem(key);
 
+        if(user == null) {
+            throw new NullPointerException("[Bad Request] User does not exist");
+        }
+
         User foundUser = new User(user.getFirstName(), user.getLastName(), user.getAlias(), user.getImageUrl());
         return foundUser;
     }

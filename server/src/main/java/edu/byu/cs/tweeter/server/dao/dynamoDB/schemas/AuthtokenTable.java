@@ -7,7 +7,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 @DynamoDbBean
 public class AuthtokenTable {
     private String authtoken;
-    private String timeout;
+    private Long timeout;
     private String userAlias;
 
     @DynamoDbPartitionKey
@@ -20,11 +20,10 @@ public class AuthtokenTable {
     }
 
     @DynamoDbSortKey
-    public String getTimeout() {
+    public Long getTimeout() {
         return timeout;
     }
-
-    public void setTimeout(String timeout) {
+    public void setTimeout(Long timeout) {
         this.timeout = timeout;
     }
 

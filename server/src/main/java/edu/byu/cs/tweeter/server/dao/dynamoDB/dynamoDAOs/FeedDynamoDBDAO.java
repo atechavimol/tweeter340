@@ -42,9 +42,6 @@ public class FeedDynamoDBDAO implements FeedDAO {
             .dynamoDbClient(dynamoDbClient)
             .build();
 
-    private static boolean isNonEmptyString(String value) {
-        return (value != null && value.length() > 0);
-    }
 
     @Override
     public Pair<List<Feed>, Boolean> getFeed(FeedRequest request) {
@@ -70,7 +67,7 @@ public class FeedDynamoDBDAO implements FeedDAO {
             requestBuilder.exclusiveStartKey(startKey);
         }
 
-        QueryEnhancedRequest request = requestBuilder.build();
+        QueryEnhancedRequest request = requestBuilder.scanIndexForward(false).build();
 
         DataPage<Feed> result = new DataPage<Feed>();
 

@@ -75,7 +75,7 @@ public class StoryDynamoDBDAO implements StoryDAO {
             requestBuilder.exclusiveStartKey(startKey);
         }
 
-        QueryEnhancedRequest request = requestBuilder.build();
+        QueryEnhancedRequest request = requestBuilder.scanIndexForward(false).build();
 
         DataPage<Story> result = new DataPage<Story>();
 
@@ -95,9 +95,7 @@ public class StoryDynamoDBDAO implements StoryDAO {
     @Override
     public PostStatusResponse postStatus(Status status) {
         DynamoDbTable<Story> table = enhancedClient.table(TableName, TableSchema.fromBean(Story.class));
-//        Key key = Key.builder()
-//                .partitionValue(user.getAlias())
-//                .build();
+
         User user = status.getUser();
 
         Story newStory = new Story();
@@ -106,36 +104,7 @@ public class StoryDynamoDBDAO implements StoryDAO {
         newStory.setTimestamp(status.getTimestamp());
         newStory.setUrls(status.getUrls());
         newStory.setMentions(status.getMentions());
-      // newStory.setStatusHash(status.hashCode());
         table.putItem(newStory);
         return new PostStatusResponse();
-    }
-
-    private int getStatusesStartingIndex(Integer lastStatusHash, List<Status> allStatuses) {
-
-        int statusesIndex = 0;
-
-        if(lastStatusHash != null) {
-            // This is a paged request for something after the first page. Find the first item
-            // we should return
-            for (int i = 0; i < allStatuses.size(); i++) {
-                if(lastStatusHash == allStatuses.get(i).hashCode()) {
-                    // We found the index of the last item returned last time. Increment to get
-                    // to the first one we should return
-                    statusesIndex = i + 1;
-                    break;
-                }
-            }
-        }
-
-        return statusesIndex;
-    }
-
-    List<Status> getDummyStatuses() {
-        return getFakeData().getFakeStatuses();
-    }
-
-    FakeData getFakeData() {
-        return FakeData.getInstance();
     }
 }

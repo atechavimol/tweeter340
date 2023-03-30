@@ -16,6 +16,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
     private static final String TableName = "Authtoken";
 
+    private static final long timeOutPeriod = 60 * 100;
+
 
     private static DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
             .region(Region.US_WEST_2)
@@ -37,14 +39,16 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
 
         //TODO make real datetime
 
+        Long timeout = System.currentTimeMillis() + (1000 * timeOutPeriod);
+
         AuthtokenTable newAuthtoken = new AuthtokenTable();
         newAuthtoken.setAuthtoken(uuid.toString());
-        newAuthtoken.setTimeout("TIMEOUT");
+        newAuthtoken.setTimeout(timeout);
         newAuthtoken.setUserAlias(userAlias);
 
         table.putItem(newAuthtoken);
 
-        return new AuthToken(newAuthtoken.getAuthtoken(), newAuthtoken.getTimeout());
+        return new AuthToken(newAuthtoken.getAuthtoken(), newAuthtoken.getTimeout().toString());
     }
 
     @Override
@@ -52,12 +56,10 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
         DynamoDbTable<AuthtokenTable> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenTable.class));
 
         Key key = Key.builder()
-                .partitionValue(authToken.getToken()).sortValue(authToken.getDatetime())
+                .partitionValue(authToken.getToken()).sortValue(Long.parseLong(authToken.getDatetime()))
                 .build();
 
-        //TODO check if the authtoken actually got deleted
-        table.deleteItem(key);
-
+        AuthtokenTable authtoken = table.deleteItem(key);
     }
 
     @Override
@@ -65,7 +67,7 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
         DynamoDbTable<AuthtokenTable> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenTable.class));
 
         Key key = Key.builder()
-                .partitionValue(authToken.getToken()).sortValue(authToken.getDatetime())
+                .partitionValue(authToken.getToken()).sortValue(Long.parseLong(authToken.getDatetime()))
                 .build();
 
         AuthtokenTable foundAuthtoken = table.getItem(key);
@@ -73,7 +75,7 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
         if(foundAuthtoken == null){
             throw new RuntimeException("[Bad Request] The session has expired. Logout and log back in to renew the session");
         } else if(!isValid(foundAuthtoken)) {
-            //expireToken(authToken);
+            expireToken(authToken);
             throw new RuntimeException("[Bad Request] The session has expired. Logout and log back in to renew the session");
         } else {
             return foundAuthtoken.getUserAlias();
@@ -82,8 +84,7 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
     }
 
     private Boolean isValid(AuthtokenTable authtoken){
-        // TODO validate authtoken timout
-        return true;
+        return authtoken.getTimeout() > System.currentTimeMillis();
     }
 
 

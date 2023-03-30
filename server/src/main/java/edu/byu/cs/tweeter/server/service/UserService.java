@@ -95,8 +95,13 @@ public class UserService extends Service{
             throw new RuntimeException("[Bad Request] Request must have alias");
         }
 
-        User user = userDAO.getUser(request.getAlias());
-        return new GetUserResponse(user);
+        try {
+            authtokenDAO.validateToken(request.getAuthToken());
+            User user = userDAO.getUser(request.getAlias());
+            return new GetUserResponse(user);
+        } catch (Exception e) {
+            return new GetUserResponse(e.getMessage());
+        }
     }
 
     private static String hashPassword(String passwordToHash) {
