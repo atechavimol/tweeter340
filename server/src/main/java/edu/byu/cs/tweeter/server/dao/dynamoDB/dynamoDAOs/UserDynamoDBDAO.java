@@ -1,5 +1,14 @@
 package edu.byu.cs.tweeter.server.dao.dynamoDB.dynamoDAOs;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
@@ -68,23 +77,49 @@ public class UserDynamoDBDAO implements UserDAO {
             return null;
 
         } else {
+            String imageUrl = uploadtoS3(image, username);
+
             user = new UserTable();
+
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setAlias(username);
-            user.setImageUrl(image);
+            user.setImageUrl(imageUrl);
             user.setPassword(hashedPassword);
             user.setFollowersCount(0);
             user.setFollowingCount(0);
+
             table.putItem(user);
         }
 
         return new User(user.getFirstName(), user.getLastName(), user.getAlias(), user.getImageUrl());
     }
 
+    private String uploadtoS3(String imageString, String alias) {
+        AmazonS3 s3 = AmazonS3ClientBuilder
+                .standard()
+                .withRegion("us-west-2")
+                .build();
+
+        byte[] byteArray = Base64.getDecoder().decode(imageString);
+
+        ObjectMetadata data = new ObjectMetadata();
+
+        data.setContentLength(byteArray.length);
+
+        data.setContentType("image/jpeg");
+
+        PutObjectRequest request = new PutObjectRequest("tweeter-user-photo", alias, new ByteArrayInputStream(byteArray), data).withCannedAcl(CannedAccessControlList.PublicRead);
+
+        s3.putObject(request);
+
+        String link = "https://tweeter-user-photo.s3.us-west-2.amazonaws.com/" + alias;
+
+        return link;
+    }
+
     @Override
     public LogoutResponse logout(LogoutRequest request) {
-        //TODO THIS feels wrong
         return new LogoutResponse(true);
     }
 

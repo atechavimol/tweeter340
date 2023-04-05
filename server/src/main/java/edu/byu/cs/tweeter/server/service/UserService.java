@@ -70,15 +70,21 @@ public class UserService extends Service{
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        User user = userDAO.register(request.getFirstName(), request.getLastName(), request.getUsername(),
-                                        request.getImage(), hashPassword(request.getPassword()));
+        try {
+            User user = userDAO.register(request.getFirstName(), request.getLastName(), request.getUsername(),
+                    request.getImage(), hashPassword(request.getPassword()));
 
-        if(user == null){
-            return new RegisterResponse("Alias already taken");
+            if(user == null){
+                return new RegisterResponse("Alias already taken");
+            }
+
+            AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
+            return new RegisterResponse(user, authToken);
+        } catch (Exception e) {
+            return  new RegisterResponse(e.getMessage());
         }
 
-        AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
-        return new RegisterResponse(user, authToken);
+
     }
 
     public LogoutResponse logout(LogoutRequest request) {

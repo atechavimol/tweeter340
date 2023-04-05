@@ -98,8 +98,6 @@ public class FeedDynamoDBDAO implements FeedDAO {
         newFeed.setMentions(status.getMentions());
 
         table.putItem(newFeed);
-
-
     }
 
 

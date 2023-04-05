@@ -37,8 +37,6 @@ public class AuthtokenDynamoDBDAO implements AuthtokenDAO {
 
         DynamoDbTable<AuthtokenTable> table = enhancedClient.table(TableName, TableSchema.fromBean(AuthtokenTable.class));
 
-        //TODO make real datetime
-
         Long timeout = System.currentTimeMillis() + (1000 * timeOutPeriod);
 
         AuthtokenTable newAuthtoken = new AuthtokenTable();
