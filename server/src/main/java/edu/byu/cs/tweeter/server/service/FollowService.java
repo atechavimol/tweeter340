@@ -109,6 +109,19 @@ public class FollowService extends Service{
 
     }
 
+    public List<String> getAllFollowerAliases(String userAlias) {
+        Pair<List<Follows>, Boolean> result = followsDAO.getFollowers(userAlias, Integer.MAX_VALUE,
+                null);
+
+        List<String> users = new ArrayList<>();
+
+        for(Follows follow: result.getFirst()) {
+            users.add(follow.getFollowerAlias());
+        }
+        return users;
+
+    }
+
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
         if(request.getFollowerAlias() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
@@ -197,4 +210,7 @@ public class FollowService extends Service{
         }
 
     }
+
+
+
 }

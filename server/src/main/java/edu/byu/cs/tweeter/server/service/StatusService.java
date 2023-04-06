@@ -101,24 +101,15 @@ public class StatusService extends Service{
 
         try {
             String curUserAlias = authtokenDAO.validateToken(request.getAuthToken());
-
-            //post to user's own story
             storyDAO.postStatus(request.getStatus());
-
-            //get list of my followers
-            Pair<List<Follows>, Boolean> page = followsDAO.getFollowers(curUserAlias, Integer.MAX_VALUE, null);
-
-            //update my followers feed with new post
-            for(Follows follow: page.getFirst()) {
-                String followerAlias = follow.getFollowerAlias();
-                feedDAO.postStatus(followerAlias, request.getStatus());
-            }
 
             return new PostStatusResponse();
         } catch (Exception e) {
             return new PostStatusResponse(e.getMessage());
         }
+    }
 
-
+    public void updateUserFeed(Status status, String alias) {
+        feedDAO.postStatus(alias, status);
     }
 }
