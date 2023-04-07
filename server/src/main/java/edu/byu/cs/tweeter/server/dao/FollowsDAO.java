@@ -30,4 +30,5 @@ public interface FollowsDAO {
 
     void unfollow(String followerAlias, String followeeAlias);
 
+    void addFollowersBatch(List<String> followers, String followTarget);
 }

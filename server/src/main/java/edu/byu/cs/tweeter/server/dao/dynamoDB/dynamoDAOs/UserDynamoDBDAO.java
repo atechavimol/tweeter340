@@ -7,28 +7,25 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
-import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
-import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
-import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
-import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Follows;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.UserTable;
-import edu.byu.cs.tweeter.util.FakeData;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 public class UserDynamoDBDAO implements UserDAO {
 
@@ -64,6 +61,7 @@ public class UserDynamoDBDAO implements UserDAO {
 
         return new User(user.getFirstName(), user.getLastName(), user.getAlias(), user.getImageUrl());
     }
+
 
     @Override
     public User register(String firstName, String lastName, String username, String image, String hashedPassword) {
@@ -202,6 +200,52 @@ public class UserDynamoDBDAO implements UserDAO {
             throw new NullPointerException("[Bad Request] User does not exist");
         }
         return user.getFollowingCount();
+    }
+
+    @Override
+    public void addUserBatch(List<UserTable> users) {
+        List<UserTable> batchToWrite = new ArrayList<>();
+        for (UserTable u : users) {
+            batchToWrite.add(u);
+
+            if (batchToWrite.size() == 25) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfUsers(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfUsers(batchToWrite);
+        }
+    }
+
+    private void writeChunkOfUsers(List<UserTable> users) {
+        if(users.size() > 25)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<UserTable> table = enhancedClient.table(TableName, TableSchema.fromBean(UserTable.class));
+        WriteBatch.Builder<UserTable> writeBuilder = WriteBatch.builder(UserTable.class).mappedTableResource(table);
+        for (UserTable item : users) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfUsers(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
     }
 
 }

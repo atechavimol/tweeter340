@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.util.List;
+
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
@@ -9,6 +11,7 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.UserTable;
 
 public interface UserDAO {
     User register(String firstName, String lastName, String username, String image, String hashedPassword);
@@ -26,4 +29,6 @@ public interface UserDAO {
     int getFollowingCount(String userAlias);
 
     User login(String username, String hashedPassword);
+
+    void addUserBatch(List<UserTable> users);
 }

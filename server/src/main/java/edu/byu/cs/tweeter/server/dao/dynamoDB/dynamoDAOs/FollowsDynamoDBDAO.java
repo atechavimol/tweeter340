@@ -4,26 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
-import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowersCountRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
-import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowersCountResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
-import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
-import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.server.dao.FollowsDAO;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.DataPage;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Follows;
-import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.UserTable;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -31,13 +17,17 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 public class FollowsDynamoDBDAO implements FollowsDAO {
     private static final String TableName = "Follows";
@@ -190,33 +180,56 @@ public class FollowsDynamoDBDAO implements FollowsDAO {
 
     }
 
-    /**
-     * Determines the index for the first followee in the specified 'allFollowees' list that should
-     * be returned in the current request. This will be the index of the next followee after the
-     * specified 'lastFollowee'.
-     *
-     * @param lastFolloweeAlias the alias of the last followee that was returned in the previous
-     *                          request or null if there was no previous request.
-     * @param allFollowees the generated list of followees from which we are returning paged results.
-     * @return the index of the first followee to be returned.
-     */
-    private int getFolloweesStartingIndex(String lastFolloweeAlias, List<User> allFollowees) {
-        int followeesIndex = 0;
+    @Override
+    public void addFollowersBatch(List<String> followersAliases, String followTarget) {
+        List<Follows> batchToWrite = new ArrayList<>();
+        for (String alias : followersAliases) {
+            Follows follows = new Follows();
+            follows.setFollowerAlias(alias);
+            follows.setFolloweeAlias(followTarget);
 
-        if(lastFolloweeAlias != null) {
-            // This is a paged request for something after the first page. Find the first item
-            // we should return
-            for (int i = 0; i < allFollowees.size(); i++) {
-                if(lastFolloweeAlias.equals(allFollowees.get(i).getAlias())) {
-                    // We found the index of the last item returned last time. Increment to get
-                    // to the first one we should return
-                    followeesIndex = i + 1;
-                    break;
-                }
+            batchToWrite.add(follows);
+
+            if (batchToWrite.size() == 25) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfFollows(batchToWrite);
+                batchToWrite = new ArrayList<>();
             }
         }
 
-        return followeesIndex;
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfFollows(batchToWrite);
+        }
     }
+
+    private void writeChunkOfFollows(List<Follows> followsList) {
+        if(followsList.size() > 25)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<Follows> table = enhancedClient.table(TableName, TableSchema.fromBean(Follows.class));
+        WriteBatch.Builder<Follows> writeBuilder = WriteBatch.builder(Follows.class).mappedTableResource(table);
+        for (Follows follows : followsList) {
+            writeBuilder.addPutItem(builder -> builder.item(follows));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfFollows(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+
 
 }
