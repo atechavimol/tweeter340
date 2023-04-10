@@ -25,7 +25,8 @@ public class UpdateFeeds implements RequestHandler<SQSEvent, Void> {
                 Status status = batch.getStatus();
                 List<String> followerAliases = batch.getFollowerAliases();
 
-                updateAllFeeds(status, followerAliases);
+                //updateAllFeeds(status, followerAliases);
+                statusService.updateFeeds(status, followerAliases);
 
             }
         } catch (Exception e) {
@@ -34,14 +35,14 @@ public class UpdateFeeds implements RequestHandler<SQSEvent, Void> {
         return null;
     }
 
-    private void updateAllFeeds(Status status, List<String> aliases) {
-        for(String alias: aliases) {
-            updateFeed(status, alias);
-        }
-    }
+//    private void updateAllFeeds(Status status, List<String> aliases) {
+//        for(String alias: aliases) {
+//            updateFeed(status, alias);
+//        }
+//    }
 
-    private void updateFeed(Status status, String alias) {
-        statusService.updateUserFeed(status, alias);
-        System.out.println("Updating feed for: " + alias);
-    }
+//    private void updateFeed(Status status, String alias) {
+//        statusService.updateUserFeed(status, alias);
+//        System.out.println("Updating feed for: " + alias);
+//    }
 }
