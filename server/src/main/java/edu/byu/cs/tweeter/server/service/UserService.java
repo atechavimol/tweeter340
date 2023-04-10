@@ -81,6 +81,7 @@ public class UserService extends Service{
             AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
             return new RegisterResponse(user, authToken);
         } catch (Exception e) {
+            System.out.println(e);
             return  new RegisterResponse(e.getMessage());
         }
 
@@ -106,6 +107,7 @@ public class UserService extends Service{
             User user = userDAO.getUser(request.getAlias());
             return new GetUserResponse(user);
         } catch (Exception e) {
+            System.out.println(e);
             return new GetUserResponse(e.getMessage());
         }
     }

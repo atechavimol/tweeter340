@@ -13,4 +13,6 @@ public interface FeedDAO {
     Pair<List<Feed>, Boolean> getFeed(FeedRequest request);
 
     void postStatus(String followerAlias, Status status);
+
+    void addFeedBatch(Status status, List<String> followerAliases);
 }

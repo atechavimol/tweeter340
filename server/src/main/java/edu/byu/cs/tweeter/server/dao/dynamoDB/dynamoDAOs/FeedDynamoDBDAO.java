@@ -13,19 +13,24 @@ import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.DataPage;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Feed;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Story;
+import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.UserTable;
 import edu.byu.cs.tweeter.util.FakeData;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 public class FeedDynamoDBDAO implements FeedDAO {
 
@@ -98,6 +103,54 @@ public class FeedDynamoDBDAO implements FeedDAO {
         newFeed.setMentions(status.getMentions());
 
         table.putItem(newFeed);
+    }
+
+    @Override
+    public void addFeedBatch(Status status, List<String> followerAliases) {
+        List<Feed> feeds = new ArrayList<>();
+
+        for(String alias:followerAliases) {
+            Feed feed = new Feed();
+            feed.setFollowerAlias(alias);
+            feed.setFolloweeAlias(status.getUser().getAlias());
+            feed.setTimestamp(status.getTimestamp());
+            feed.setMentions(status.getMentions());
+            feed.setPost(status.getPost());
+            feed.setUrls(status.getUrls());
+
+            feeds.add(feed);
+        }
+
+        if(feeds.size() > 0) {
+            writeChunkOfFeeds(feeds);
+        }
+
+    }
+
+    private void writeChunkOfFeeds(List<Feed> feeds) {
+        if(feeds.size() > 25)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<Feed> table = enhancedClient.table(TableName, TableSchema.fromBean(Feed.class));
+        WriteBatch.Builder<Feed> writeBuilder = WriteBatch.builder(Feed.class).mappedTableResource(table);
+        for (Feed item : feeds) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfFeeds(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
     }
 
 

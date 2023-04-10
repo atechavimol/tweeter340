@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
-import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
@@ -18,7 +17,6 @@ import edu.byu.cs.tweeter.server.dao.FollowsDAO;
 import edu.byu.cs.tweeter.server.dao.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Feed;
-import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Follows;
 import edu.byu.cs.tweeter.server.dao.dynamoDB.schemas.Story;
 import edu.byu.cs.tweeter.util.Pair;
 
@@ -67,6 +65,7 @@ public class StatusService extends Service{
             }
             return new StoryResponse(statuses, result.getSecond());
         } catch (Exception e) {
+            System.out.println(e);
             return new StoryResponse(e.getMessage());
         }
     }
@@ -90,6 +89,7 @@ public class StatusService extends Service{
             }
             return new FeedResponse(statuses, result.getSecond());
         } catch (Exception e) {
+            System.out.println(e);
             return new FeedResponse(e.getMessage());
         }
     }
@@ -105,11 +105,20 @@ public class StatusService extends Service{
 
             return new PostStatusResponse();
         } catch (Exception e) {
+            System.out.println(e);
             return new PostStatusResponse(e.getMessage());
         }
     }
 
-    public void updateUserFeed(Status status, String alias) {
-        feedDAO.postStatus(alias, status);
+    public void updateFeeds(Status status, List<String> followerAliases) {
+        try {
+            feedDAO.addFeedBatch(status, followerAliases);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
+
+//    public void updateUserFeed(Status status, String alias) {
+//        feedDAO.postStatus(alias, status);
+//    }
 }
