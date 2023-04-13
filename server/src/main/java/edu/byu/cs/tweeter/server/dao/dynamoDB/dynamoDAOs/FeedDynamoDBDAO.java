@@ -142,7 +142,6 @@ public class FeedDynamoDBDAO implements FeedDAO {
         try {
             BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
 
-            // just hammer dynamodb again with anything that didn't get written this time
             if (result.unprocessedPutItemsForTable(table).size() > 0) {
                 writeChunkOfFeeds(result.unprocessedPutItemsForTable(table));
             }

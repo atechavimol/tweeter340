@@ -118,7 +118,4 @@ public class StatusService extends Service{
         }
     }
 
-//    public void updateUserFeed(Status status, String alias) {
-//        feedDAO.postStatus(alias, status);
-//    }
 }

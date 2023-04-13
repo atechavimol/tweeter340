@@ -35,9 +35,9 @@ public class Filler {
         // Iterate over the number of users you will create
         for (int i = 1; i <= NUM_USERS; i++) {
 
-            String firstName = "big" + i;
+            String firstName = "wow" + i;
             String lastName = "Last" + i;
-            String alias = "@big" + i;
+            String alias = "@wow" + i;
 
             // Note that in this example, a UserDTO only has a name and an alias.
             // The url for the profile image can be derived from the alias in this example

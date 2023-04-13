@@ -77,6 +77,7 @@ public class FollowService extends Service{
 
             return new FollowingResponse(users, result.getSecond());
         } catch (Exception e) {
+            System.out.println("Exception: " + e);
             return new FollowingResponse(e.getMessage());
         }
 
@@ -104,6 +105,7 @@ public class FollowService extends Service{
             }
             return new FollowerResponse(users, result.getSecond());
         } catch (Exception e) {
+            System.out.println("Exception: " + e);
             return new FollowerResponse(e.getMessage());
         }
 
