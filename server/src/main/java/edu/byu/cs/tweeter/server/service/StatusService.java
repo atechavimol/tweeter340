@@ -98,6 +98,9 @@ public class StatusService extends Service{
         if(request.getStatus() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a status");
         }
+        if(request.getAuthToken() == null) {
+            throw new RuntimeException("[Bad Request] Request needs to have an authtoken");
+        }
 
         try {
             String curUserAlias = authtokenDAO.validateToken(request.getAuthToken());
@@ -105,7 +108,8 @@ public class StatusService extends Service{
 
             return new PostStatusResponse();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
+            System.out.println(e == null);
             return new PostStatusResponse(e.getMessage());
         }
     }

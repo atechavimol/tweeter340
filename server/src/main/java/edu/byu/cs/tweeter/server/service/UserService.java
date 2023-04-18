@@ -47,20 +47,26 @@ public class UserService extends Service{
     }
 
     public LoginResponse login(LoginRequest request) {
-        if(request.getUsername() == null){
-            throw new RuntimeException("[Bad Request] Missing a username");
-        } else if(request.getPassword() == null) {
-            throw new RuntimeException("[Bad Request] Missing a password");
+        try {
+            if(request.getUsername() == null){
+                throw new RuntimeException("[Bad Request] Missing a username");
+            } else if(request.getPassword() == null) {
+                throw new RuntimeException("[Bad Request] Missing a password");
+            }
+
+            User user = userDAO.login(request.getUsername(), hashPassword(request.getPassword()));
+
+            if(user == null) {
+                return new LoginResponse("Invalid credentials");
+            }
+
+            AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
+            return new LoginResponse(user, authToken);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new LoginResponse(e.getMessage());
         }
 
-        User user = userDAO.login(request.getUsername(), hashPassword(request.getPassword()));
-
-        if(user == null) {
-            return new LoginResponse("Invalid credentials");
-        }
-
-        AuthToken authToken = authtokenDAO.insertToken(request.getUsername());
-        return new LoginResponse(user, authToken);
     }
 
     public RegisterResponse register(RegisterRequest request) {
